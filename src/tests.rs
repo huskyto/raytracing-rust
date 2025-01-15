@@ -1,5 +1,3 @@
-
-    
 #[cfg(test)]
 mod vec3_tests {
     use crate::datatypes::*;
@@ -103,5 +101,27 @@ mod vec3_tests {
         assert_eq!(div.x, 1.0);
         assert_eq!(div.y, 2.0);
         assert_eq!(div.z, 3.0);
+    }
+}
+
+#[cfg(test)]
+mod color_util_tests {
+    use crate::datatypes::*;
+    use crate::utils::ColorUtil;
+
+    #[test]
+    fn test_get_color_str() {
+        let color = Color3::new(0.5, 0.7, 0.9);
+        let color_str = ColorUtil::get_color_str(&color);
+        assert_eq!(color_str, "127 179 230\n");
+    }
+
+    #[test]
+    fn test_get_pixel() {
+        let color = Color3::new(0.5, 0.7, 0.9);
+        let pixel = ColorUtil::get_pixel(&color);
+        assert_eq!(pixel[0], 127);
+        assert_eq!(pixel[1], 179);
+        assert_eq!(pixel[2], 230);
     }
 }
