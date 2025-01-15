@@ -1,3 +1,6 @@
+
+mod datatypes;
+
 use std::thread;
 use std::time;
 use indicatif::ProgressIterator;
