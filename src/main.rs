@@ -2,6 +2,7 @@
 mod datatypes;
 mod utils;
 mod tests;
+mod shapes;
 
 use std::thread;
 use std::time;
@@ -10,6 +11,7 @@ use datatypes::Point3;
 use datatypes::Ray;
 use datatypes::Vec3;
 use indicatif::ProgressIterator;
+use shapes::Sphere;
 use utils::ColorUtil;
 
 fn main() {
@@ -57,7 +59,7 @@ fn main() {
 }
 
 fn ray_color(ray: &Ray) -> Color3 {
-    if hit_sphere(&-&Vec3::z_u(), 0.5, ray) {
+    if hit_sphere(&Sphere::new(0.5, 0.0, 0.0, -1.0), ray) {
         Color3::new(1.0, 0.0, 0.0)
     }
     else {
@@ -67,11 +69,11 @@ fn ray_color(ray: &Ray) -> Color3 {
     }
 }
 
-fn hit_sphere(center: &Point3, radius: f32, ray: &Ray) -> bool {
-    let oc = center - ray.origin();
+fn hit_sphere(sphere: &Sphere, ray: &Ray) -> bool {
+    let oc = &sphere.center - ray.origin();
     let a = ray.direction().dot(ray.direction());
     let b = -2.0 * ray.direction().dot(&oc);
-    let c = oc.dot(&oc) - radius * radius;
+    let c = oc.dot(&oc) - sphere.radius * sphere.radius;
     let discriminant = b * b - 4.0 * a * c;
     discriminant > 0.0
 }
