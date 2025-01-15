@@ -22,11 +22,19 @@ pub struct Vec3 {
 
 impl Vec3 {
     pub fn zero() -> Self {
-        Self {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        }
+        Self::new(0.0, 0.0, 0.0)
+    }
+    pub fn one() -> Self {
+        Self::new(1.0, 1.0, 1.0)
+    }
+    pub fn x_u() -> Self {
+        Self::new(1.0, 0.0, 0.0)
+    }
+    pub fn y_u() -> Self {
+        Self::new(0.0, 1.0, 0.0)
+    }
+    pub fn z_u() -> Self {
+        Self::new(0.0, 0.0, 1.0)
     }
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
@@ -37,7 +45,7 @@ impl Vec3 {
     pub fn len(&self) -> f32 {
         f32::sqrt(self.len_sqr())
     }
-    pub fn dot(&self, rhs: Vec3) -> f32 {
+    pub fn dot(&self, rhs: &Vec3) -> f32 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
     pub fn cross(&self, rhs: Vec3) -> Vec3 {
@@ -99,7 +107,7 @@ impl Sub for &Vec3 {
         Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
-impl Neg for Vec3 {
+impl Neg for &Vec3 {
     type Output = Vec3;
 
     fn neg(self) -> Self::Output {
@@ -127,6 +135,13 @@ impl Mul<f32> for &Vec3 {
 
     fn mul(self, rhs: f32) -> Self::Output {
         Vec3::new(self.x * rhs, self.y * rhs, self.z * rhs)
+    }
+}
+impl Mul<&Vec3> for f32 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: &Vec3) -> Self::Output {
+        rhs * self
     }
 }
 impl Mul<Vec3> for f32 {
@@ -172,3 +187,22 @@ impl Display for Vec3 {
     }
 }
 
+
+pub struct Ray {
+    origin: Point3,
+    direction: Vec3
+}
+impl Ray {
+    pub fn new(origin: Point3, direction: Vec3) -> Self {
+        Self { origin, direction }
+    }
+    pub fn origin(&self) -> &Point3 {
+        &self.origin
+    }
+    pub fn direction(&self) -> &Vec3 {
+        &self.direction
+    }
+    pub fn at(&self, t: f32) -> Point3 {
+        &self.origin + &(&self.direction * t)
+    }
+}
