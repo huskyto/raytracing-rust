@@ -48,8 +48,8 @@ fn main() {
             let pixel = ray_color(&ray);
             pixels.push(pixel);
         }
-        let ten_millis = time::Duration::from_millis(2);
-        thread::sleep(ten_millis);
+        // let ten_millis = time::Duration::from_millis(2);
+        // thread::sleep(ten_millis);
     }
 
     let image = ImageUtil::get_rgb_image(pixels, im_width, im_height);
@@ -57,9 +57,12 @@ fn main() {
 }
 
 fn ray_color(ray: &Ray) -> Color3 {
-    if hit_sphere(&Sphere::new(0.5, 0.0, 0.0, -1.0), ray) {
-        Color3::new(1.0, 0.0, 0.0)
+    let t = hit_sphere(&Sphere::new(0.5, 0.0, 0.0, -1.0), ray);
+    if t > 0.0 {
+        let n = (ray.at(t) - Vec3::new(0.0, 0.0, -1.0)).unit();
+        (n + Color3::one()) * 0.5
     }
+
     else {
         let unit_dir = ray.direction().unit();
         let a = 0.5 * (unit_dir.y + 1.0);
@@ -67,11 +70,16 @@ fn ray_color(ray: &Ray) -> Color3 {
     }
 }
 
-fn hit_sphere(sphere: &Sphere, ray: &Ray) -> bool {
+fn hit_sphere(sphere: &Sphere, ray: &Ray) -> f32 {
     let oc = &sphere.center - ray.origin();
     let a = ray.direction().dot(ray.direction());
     let b = -2.0 * ray.direction().dot(&oc);
     let c = oc.dot(&oc) - sphere.radius * sphere.radius;
     let discriminant = b * b - 4.0 * a * c;
-    discriminant > 0.0
+    if discriminant < 0.0 {
+        -1.0
+    }
+    else {
+        (-b - f32::sqrt(discriminant)) / (2.0 * a)
+    }
 }
