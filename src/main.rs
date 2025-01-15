@@ -12,15 +12,14 @@ use datatypes::Ray;
 use datatypes::Vec3;
 use indicatif::ProgressIterator;
 use shapes::Sphere;
-use utils::ColorUtil;
+use utils::ImageUtil;
 
 fn main() {
     
         // Setup
-    let mut content = String::new();
     let aspect_ratio = 16.0 / 9.0;
-    let im_width = 400;
-    let im_height = i32::max((im_width as f32 / aspect_ratio) as i32, 1);
+    let im_width: u32 = 400;
+    let im_height: u32 = u32::max((im_width as f32 / aspect_ratio) as u32, 1);
 
         // Camera
     let focal_len = 1.0;
@@ -37,11 +36,9 @@ fn main() {
     let vp_upper_left = &camera_center - &Vec3::new(0.0, 0.0, focal_len) - &vp_u / 2.0 - &vp_v / 2.0;
     let px_00_loc = &vp_upper_left + &(0.5 * (&px_delta_u + &px_delta_v));
 
-        // Render
-    content.push_str("P3\n");   // Define ASCII color mode.
-    content.push_str(&format!("{im_width} {im_height}\n"));     // Dimensions.
-    content.push_str("255\n");  // Set max color
+    let mut pixels: Vec<Color3> = Vec::new();
     
+        // Render
     for j in (0..im_height).progress() {
         for i in 0..im_width {
             let px_center= &px_00_loc + &(i as f32 * &px_delta_u) + (j as f32 * &px_delta_v);
@@ -49,13 +46,14 @@ fn main() {
             let ray = Ray::new(camera_center.clone(), ray_dir);
 
             let pixel = ray_color(&ray);
-            content.push_str(&ColorUtil::get_color_str(&pixel));
+            pixels.push(pixel);
         }
-        let ten_millis = time::Duration::from_millis(10);
+        let ten_millis = time::Duration::from_millis(2);
         thread::sleep(ten_millis);
     }
 
-    println!("{content}");
+    let image = ImageUtil::get_rgb_image(pixels, im_width, im_height);
+    let _ = image.save("output.png");
 }
 
 fn ray_color(ray: &Ray) -> Color3 {
