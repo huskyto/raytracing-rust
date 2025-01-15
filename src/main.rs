@@ -72,14 +72,15 @@ fn ray_color(ray: &Ray) -> Color3 {
 
 fn hit_sphere(sphere: &Sphere, ray: &Ray) -> f32 {
     let oc = &sphere.center - ray.origin();
-    let a = ray.direction().dot(ray.direction());
-    let b = -2.0 * ray.direction().dot(&oc);
-    let c = oc.dot(&oc) - sphere.radius * sphere.radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let a = ray.direction().len_sqr();
+    let h = ray.direction().dot(&oc);
+    let c = oc.len_sqr() - sphere.radius * sphere.radius;
+    let discriminant = h * h - a * c;
+
     if discriminant < 0.0 {
         -1.0
     }
     else {
-        (-b - f32::sqrt(discriminant)) / (2.0 * a)
+        (h - f32::sqrt(discriminant)) / a
     }
 }
