@@ -36,7 +36,7 @@ mod vec3_tests {
     fn test_dot() {
         let v1 = Vec3::new(1.0, 2.0, 3.0);
         let v2 = Vec3::new(4.0, 5.0, 6.0);
-        assert_eq!(v1.dot(v2), 32.0);
+        assert_eq!(v1.dot(&v2), 32.0);
     }
 
     #[test]
@@ -81,7 +81,7 @@ mod vec3_tests {
     #[test]
     fn test_neg() {
         let v = Vec3::new(1.0, 2.0, 3.0);
-        let neg = -v;
+        let neg = -&v;
         assert_eq!(neg.x, -1.0);
         assert_eq!(neg.y, -2.0);
         assert_eq!(neg.z, -3.0);
