@@ -10,7 +10,8 @@ use std::ops::MulAssign;
 use std::ops::Div;
 use std::ops::DivAssign;
 
-type Point3 = Vec3;
+pub type Point3 = Vec3;
+pub type Color3 = Vec3;
 
 #[derive(Clone)]
 pub struct Vec3 { 
