@@ -23,9 +23,12 @@ impl ColorUtil {
     }
 
     pub fn get_pixel(color: &Color3) -> image::Rgb<u8> {
-        let ir = (256.0 * ColorUtil::INTENSITY.clamp(color.x)) as u8;
-        let ig = (256.0 * ColorUtil::INTENSITY.clamp(color.y)) as u8;
-        let ib = (256.0 * ColorUtil::INTENSITY.clamp(color.z)) as u8;
+        let gr = MathUtil::linear_to_gamma(color.x);
+        let gg = MathUtil::linear_to_gamma(color.y);
+        let gb = MathUtil::linear_to_gamma(color.z);
+        let ir = (256.0 * ColorUtil::INTENSITY.clamp(gr)) as u8;
+        let ig = (256.0 * ColorUtil::INTENSITY.clamp(gg)) as u8;
+        let ib = (256.0 * ColorUtil::INTENSITY.clamp(gb)) as u8;
         image::Rgb([ir, ig, ib])
     }
 }
@@ -86,5 +89,13 @@ impl MathUtil {
     }
     pub fn rand_ran(min: f64, max: f64) -> f64 {
         min + (max - min) * MathUtil::rand()
+    }
+    pub fn linear_to_gamma(linear: f64) -> f64 {
+        if linear > 0.0 {
+            f64::sqrt(linear)
+        }
+        else {
+            0.0
+        }
     }
 }

@@ -68,9 +68,8 @@ impl Camera {
         let interval = Interval::new(0.001, f64::INFINITY);
         match world.hit(ray, &interval) {
             Some(hr) => {
-                let direction = Vec3::random_on_hemisphere(&hr.normal);
+                let direction = hr.normal + Vec3::random_unit();
                 0.5 * self.ray_color(&Ray::new(hr.p, direction), bounces - 1, world)
-                // 0.5 * (hr.normal + Color3::one())
             },
             None => {
                 let unit_dir = ray.direction().unit();
