@@ -42,7 +42,29 @@ impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
-    pub fn len_sqr(&self) -> f32 {
+    pub fn random() -> Self {
+        Self::new(MathUtil::rand(), MathUtil::rand(), MathUtil::rand())
+    }
+    pub fn random_ran(min: f64, max: f64) -> Self {
+        Self::new(MathUtil::rand_ran(min, max), MathUtil::rand_ran(min, max), MathUtil::rand_ran(min, max))
+    }
+    pub fn random_unit() -> Self {
+        loop {
+            let p = Self::random_ran(-1.0, 1.0);
+            let lensq = p.len_sqr();
+            if 1e-160 < lensq && lensq <= 1.0 {  // Smaller than 1e-160 underflows to zero when squared.
+                 return p / f64::sqrt(lensq);
+            }
+        }
+    }
+    pub fn random_on_hemisphere(normal: &Vec3) -> Self {
+        let on_unit_sphere = Self::random_unit();
+        if on_unit_sphere.dot(normal) > 0.0 {
+            on_unit_sphere
+        } else {
+            -&on_unit_sphere
+        }
+    }
     pub fn len_sqr(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
