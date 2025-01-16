@@ -196,3 +196,33 @@ mod math_util_tests {
         assert!((radians - std::f32::consts::PI).abs() < 1e-6);
     }
 }
+
+#[cfg(test)]
+mod camera_tests {
+    use crate::camera::Camera;
+    use crate::datatypes::{Point3, Vec3, Color3, Ray};
+    use crate::shapes::{HittableList, Hittables, Sphere};
+
+    #[test]
+    fn test_camera_ray_color_empty_world() {
+        let aspect_ratio = 16.0 / 9.0;
+        let im_width = 400;
+        let camera = Camera::new(aspect_ratio, im_width);
+        let ray = Ray::new(Point3::zero(), Vec3::new(0.0, 0.0, -1.0));
+        let world = HittableList::new();
+        let color = camera.ray_color(&ray, &world);
+        assert_eq!(color, Color3::new(0.75, 0.85, 1.0)); // Background color
+    }
+
+    #[test]
+    fn test_camera_ray_color_with_sphere() {
+        let aspect_ratio = 16.0 / 9.0;
+        let im_width = 400;
+        let camera = Camera::new(aspect_ratio, im_width);
+        let ray = Ray::new(Point3::zero(), Vec3::new(0.0, 0.0, -1.0));
+        let mut world = HittableList::new();
+        world.add(Hittables::Sphere(Sphere::new(0.5, 0.0, 0.0, -1.0)));
+        let color = camera.ray_color(&ray, &world);
+        assert_eq!(color, Color3::new(0.5, 0.5, 1.0)); // Sphere color
+    }
+}
