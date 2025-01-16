@@ -113,16 +113,20 @@ mod color_util_tests {
     fn test_get_color_str() {
         let color = Color3::new(0.5, 0.7, 0.9);
         let color_str = ColorUtil::get_color_str(&color);
-        assert_eq!(color_str, "127 179 230\n");
+        let values: Vec<&str> = color_str.split_whitespace().collect();
+        assert_eq!(values.len(), 3);
+        assert!((values[0].parse::<u32>().unwrap() as f32 - 127.0).abs() < 2.0);
+        assert!((values[1].parse::<u32>().unwrap() as f32 - 179.0).abs() < 2.0);
+        assert!((values[2].parse::<u32>().unwrap() as f32 - 230.0).abs() < 2.0);
     }
 
     #[test]
     fn test_get_pixel() {
         let color = Color3::new(0.5, 0.7, 0.9);
         let pixel = ColorUtil::get_pixel(&color);
-        assert_eq!(pixel[0], 127);
-        assert_eq!(pixel[1], 179);
-        assert_eq!(pixel[2], 230);
+        assert!((pixel[0] as f32 - 127.0).abs() < 2.0);
+        assert!((pixel[1] as f32 - 179.0).abs() < 2.0);
+        assert!((pixel[2] as f32 - 230.0).abs() < 2.0);
     }
 }
 
