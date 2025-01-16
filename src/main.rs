@@ -19,7 +19,7 @@ fn main() {
     world.add(Hittables::Sphere(Sphere::new(0.5, 0.0, 0.0, -1.0)));
     world.add(Hittables::Sphere(Sphere::new(100.0, 0.0, -100.5, -1.0)));
 
-    let camera = Camera::new(aspect_ratio, im_width);
+    let camera = Camera::new(aspect_ratio, im_width, 25);
     let pixels = camera.render(&world);
 
     let image = ImageUtil::get_rgb_image(pixels, camera.im_width(), camera.im_height());

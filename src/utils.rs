@@ -13,18 +13,19 @@ use crate::datatypes::Color3;
 pub struct ColorUtil;
 #[allow(unused)]
 impl ColorUtil {
+    const INTENSITY: Interval = Interval { min: 0.0, max: 0.999 };
     pub fn get_color_str(color: &Color3) -> String {
-        let ir = (255.999 * color.x) as i32;
-        let ig = (255.999 * color.y) as i32;
-        let ib = (255.999 * color.z) as i32;
+        let ir = (256.0 * ColorUtil::INTENSITY.clamp(color.x)) as i32;
+        let ig = (256.0 * ColorUtil::INTENSITY.clamp(color.y)) as i32;
+        let ib = (256.0 * ColorUtil::INTENSITY.clamp(color.z)) as i32;
 
         format!("{ir} {ig} {ib}\n")
     }
 
     pub fn get_pixel(color: &Color3) -> image::Rgb<u8> {
-        let ir = (255.999 * color.x) as u8;
-        let ig = (255.999 * color.y) as u8;
-        let ib = (255.999 * color.z) as u8;
+        let ir = (256.0 * ColorUtil::INTENSITY.clamp(color.x)) as u8;
+        let ig = (256.0 * ColorUtil::INTENSITY.clamp(color.y)) as u8;
+        let ib = (256.0 * ColorUtil::INTENSITY.clamp(color.z)) as u8;
         image::Rgb([ir, ig, ib])
     }
 }
@@ -79,5 +80,11 @@ pub struct MathUtil;
 impl MathUtil {
     pub fn degrees_to_radians(degrees: f32) -> f32 {
         degrees * PI / 180.0
+    }
+    pub fn rand() -> f32 {
+        rand::random::<f32>()
+    }
+    pub fn rand_ran(min: f32, max: f32) -> f32 {
+        min + (max - min) * MathUtil::rand()
     }
 }

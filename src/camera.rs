@@ -8,9 +8,12 @@ use crate::datatypes::Interval;
 use crate::datatypes::Color3;
 use crate::datatypes::Ray;
 use crate::datatypes::Hittable;
+use crate::utils::MathUtil;
 
 pub struct Camera {
     aspect_ratio: f32,  // Aspect ratio
+    pixel_samples: u32, // Number of samples per pixel
+    pixel_sample_scale: f32, // Scale factor for pixel samples
     im_width: u32,      // Rendered image width
     im_height: u32,     // Rendered image height
     center: Point3,     // Camera center
@@ -20,7 +23,7 @@ pub struct Camera {
 
 }
 impl Camera {
-    pub fn new(aspect_ratio: f32, im_width: u32) -> Self {
+    pub fn new(aspect_ratio: f32, im_width: u32, pixel_samples: u32) -> Self {
         let im_height = u32::max((im_width as f32 / aspect_ratio) as u32, 1);
         let center = Point3::zero();
 
@@ -41,8 +44,12 @@ impl Camera {
         let vp_upper_left = &center - &Vec3::new(0.0, 0.0, focal_len) - &vp_u / 2.0 - &vp_v / 2.0;
         let px_00_loc = &vp_upper_left + &(0.5 * (&px_delta_u + &px_delta_v));
 
+        let pixel_sample_scale = 1.0 / pixel_samples as f32;
+
         Self {
             aspect_ratio,
+            pixel_samples,
+            pixel_sample_scale,
             im_width,
             im_height,
             center,
@@ -68,18 +75,33 @@ impl Camera {
         let mut pixels: Vec<Color3> = Vec::new();
         for j in (0..self.im_height).progress() {
             for i in 0..self.im_width {
-                let px_center= &self.px_00_loc + &(i as f32 * &self.px_delta_u) + (j as f32 * &self.px_delta_v);
-                let ray_dir = &px_center - &self.center;
-                let ray = Ray::new(self.center.clone(), ray_dir);
-    
-                let pixel = self.ray_color(&ray, world);
-                pixels.push(pixel);
+                let mut pixel = Color3::zero();
+                for _sample in 0..self.pixel_samples {
+                    let ray = self.get_ray(i, j);
+                    pixel += self.ray_color(&ray, world);
+                }
+                pixels.push(pixel * self.pixel_sample_scale);
             }
             // let ten_millis = time::Duration::from_millis(2);
             // thread::sleep(ten_millis);
         }
 
         pixels
+    }
+        // TODO I think there's a better way to do this.
+    pub fn get_ray(&self, i: u32, j: u32) -> Ray {
+        let offset = Self::sample_square();
+        let pixel_sample = &self.px_00_loc
+                    + &((i as f32 + offset.x) * &self.px_delta_u)
+                    + (j as f32 + offset.y) * &self.px_delta_v;
+
+        let ray_origin = &self.center;
+        let ray_dir = &pixel_sample - ray_origin;
+
+        Ray::new(ray_origin.clone(), ray_dir)
+    }
+    pub fn sample_square() -> Vec3 {
+        Vec3::new(MathUtil::rand() - 0.5, MathUtil::rand() - 0.5, 0.0)
     }
     pub fn im_width(&self) -> u32 {
         self.im_width
