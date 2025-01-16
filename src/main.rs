@@ -3,6 +3,7 @@ mod datatypes;
 mod utils;
 mod tests;
 mod shapes;
+mod constants;
 
 use std::thread;
 use std::time;
@@ -12,8 +13,9 @@ use datatypes::Point3;
 use datatypes::Ray;
 use datatypes::Vec3;
 use indicatif::ProgressIterator;
+use shapes::HittableList;
+use shapes::Hittables;
 use shapes::Sphere;
-use utils::HitUtil;
 use utils::ImageUtil;
 
 fn main() {
@@ -22,6 +24,11 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let im_width: u32 = 400;
     let im_height: u32 = u32::max((im_width as f32 / aspect_ratio) as u32, 1);
+
+        // World
+    let mut world = HittableList::new();
+    world.add(Hittables::Sphere(Sphere::new(0.5, 0.0, 0.0, -1.0)));
+    world.add(Hittables::Sphere(Sphere::new(100.0, 0.0, -100.5, -1.0)));
 
         // Camera
     let focal_len = 1.0;
@@ -47,7 +54,7 @@ fn main() {
             let ray_dir = &px_center - &camera_center;
             let ray = Ray::new(camera_center.clone(), ray_dir);
 
-            let pixel = ray_color(&ray);
+            let pixel = ray_color(&ray, &world);
             pixels.push(pixel);
         }
         // let ten_millis = time::Duration::from_millis(2);
@@ -58,24 +65,15 @@ fn main() {
     let _ = image.save("output.png");
 }
 
-fn ray_color(ray: &Ray) -> Color3 {
-    let t = hit_sphere(&Sphere::new(0.5, 0.0, 0.0, -1.0), ray);
-    if t > 0.0 {
-        let n = (ray.at(t) - Vec3::new(0.0, 0.0, -1.0)).unit();
-        (n + Color3::one()) * 0.5
-    }
-
-    else {
-        let unit_dir = ray.direction().unit();
-        let a = 0.5 * (unit_dir.y + 1.0);
-        (1.0 - a) * Color3::one() + (a * Color3::new(0.5, 0.7, 1.0))
-    }
-}
-
-fn hit_sphere(sphere: &Sphere, ray: &Ray) -> f32 {
-    match HitUtil::hit(&shapes::Hittables::Sphere(sphere.clone()), ray, 0.0, 200.0) {
-    // match sphere.hit(ray, 0.0, 200.0) {
-        Some(hr) => hr.t,
-        None => -1.0,
+fn ray_color(ray: &Ray, world: &HittableList) -> Color3 {
+    match world.hit(ray, 0.0, constants::INFINITY) {
+        Some(hr) => {
+            0.5 * (hr.normal + Color3::one())
+        },
+        None => {
+            let unit_dir = ray.direction().unit();
+            let a = 0.5 * (unit_dir.y + 1.0);
+            (1.0 - a) * Color3::one() + (a * Color3::new(0.5, 0.7, 1.0))
+        },
     }
 }

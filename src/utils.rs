@@ -1,9 +1,13 @@
+
+
+
 use image::RgbImage;
 
-use crate::{datatypes::{Color3, HitRecord, Hittable}, shapes::Hittables};
+use crate::{constants, datatypes::{Color3, HitRecord, Hittable}, shapes::Hittables};
 
 
 pub struct ColorUtil;
+#[allow(unused)]
 impl ColorUtil {
     pub fn get_color_str(color: &Color3) -> String {
         let ir = (255.999 * color.x) as i32;
@@ -22,7 +26,9 @@ impl ColorUtil {
     }
 }
 
+
 pub struct ImageUtil;
+#[allow(unused)]
 impl ImageUtil {
     pub fn get_rgb_image(pixels: Vec<Color3>, width: u32, height: u32) -> RgbImage {
         let mut image: RgbImage = RgbImage::new(width, height);
@@ -63,5 +69,13 @@ impl HitUtil {
             Hittables::Sphere(sphere) => sphere.hit(ray, t_min, t_max),
             Hittables::HittableList(list) => list.hit(ray, t_min, t_max),
         }
+    }
+}
+
+
+pub struct MathUtil;
+impl MathUtil {
+    pub fn degrees_to_radians(degrees: f32) -> f32 {
+        degrees * constants::PI / 180.0
     }
 }
