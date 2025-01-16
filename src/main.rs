@@ -7,11 +7,13 @@ mod shapes;
 use std::thread;
 use std::time;
 use datatypes::Color3;
+use datatypes::Hittable;
 use datatypes::Point3;
 use datatypes::Ray;
 use datatypes::Vec3;
 use indicatif::ProgressIterator;
 use shapes::Sphere;
+use utils::HitUtil;
 use utils::ImageUtil;
 
 fn main() {
@@ -71,16 +73,9 @@ fn ray_color(ray: &Ray) -> Color3 {
 }
 
 fn hit_sphere(sphere: &Sphere, ray: &Ray) -> f32 {
-    let oc = &sphere.center - ray.origin();
-    let a = ray.direction().len_sqr();
-    let h = ray.direction().dot(&oc);
-    let c = oc.len_sqr() - sphere.radius * sphere.radius;
-    let discriminant = h * h - a * c;
-
-    if discriminant < 0.0 {
-        -1.0
-    }
-    else {
-        (h - f32::sqrt(discriminant)) / a
+    match HitUtil::hit(&shapes::Hittables::Sphere(sphere.clone()), ray, 0.0, 200.0) {
+    // match sphere.hit(ray, 0.0, 200.0) {
+        Some(hr) => hr.t,
+        None => -1.0,
     }
 }

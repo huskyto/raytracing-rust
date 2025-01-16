@@ -1,6 +1,13 @@
 
-use crate::datatypes::Point3;
+use crate::{datatypes::{HitRecord, Hittable, Point3, Ray}, utils::HitUtil};
 
+#[derive(Clone)]
+pub enum Hittables {
+    Sphere(Sphere),
+    HittableList(HittableList)
+}
+
+#[derive(Clone)]
 pub struct Sphere {
     pub radius: f32,
     pub center: Point3
@@ -45,3 +52,37 @@ impl Hittable for Sphere {
     }
 }
 
+
+#[derive(Clone)]
+pub struct HittableList {
+    pub objects: Vec<Hittables>
+}
+impl HittableList {
+    pub fn new() -> Self {
+        Self { objects: Vec::new() }
+    }
+    pub fn add(&mut self, object: Hittables) {
+        self.objects.push(object);
+    }
+}
+impl Hittable for HittableList {
+    fn hit(&self, ray: &crate::datatypes::Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        // let mut tmp_rec: HitRecord;
+        // let mut hit_anything = false;
+        let mut closest_so_far = t_max;
+        let mut rec: Option<HitRecord> = None;
+
+        for object in &self.objects {
+            if let Some(hr) = HitUtil::hit(object, ray, t_min, t_max) {
+            // if let Some(hr) = object.hit(ray, t_min, t_max) {
+                // hit_anything = true;
+                if hr.t < closest_so_far {
+                    closest_so_far = hr.t;
+                    rec = Some(hr);
+                }
+            }
+        }
+
+        rec
+    }
+}

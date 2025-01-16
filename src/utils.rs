@@ -1,6 +1,6 @@
 use image::RgbImage;
 
-use crate::datatypes::Color3;
+use crate::{datatypes::{Color3, HitRecord, Hittable}, shapes::Hittables};
 
 
 pub struct ColorUtil;
@@ -53,4 +53,15 @@ impl ImageUtil {
         content
     }
 
+}
+
+
+pub struct HitUtil;
+impl HitUtil {
+    pub fn hit(hittable: &Hittables, ray: &crate::datatypes::Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        match hittable {
+            Hittables::Sphere(sphere) => sphere.hit(ray, t_min, t_max),
+            Hittables::HittableList(list) => list.hit(ray, t_min, t_max),
+        }
+    }
 }
