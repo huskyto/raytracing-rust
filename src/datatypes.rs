@@ -206,3 +206,27 @@ impl Ray {
         &self.origin + &(&self.direction * t)
     }
 }
+
+
+    // TODO optimize later
+pub trait Hittable {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
+}
+
+pub struct HitRecord {
+    pub p: Point3,
+    pub normal: Vec3,
+    pub t: f32,
+    pub is_front_face: bool
+}
+impl HitRecord {
+    pub fn new(p: Point3, normal: Vec3, t: f32) -> Self {
+        Self { p, normal, t, is_front_face: false }
+    }
+    pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: &Vec3) {
+                // Sets the hit record normal vector.
+                // outward_normal is assumed to have unit length.
+        self.is_front_face = ray.direction().dot(outward_normal) < 0.0;
+        self.normal = if self.is_front_face { outward_normal.clone() } else { -outward_normal };
+    }
+}
