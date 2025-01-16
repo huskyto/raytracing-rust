@@ -1,4 +1,5 @@
 
+use core::f32;
 use std::fmt::Display;
 use std::ops::Sub;
 use std::ops::Neg;
@@ -208,9 +209,8 @@ impl Ray {
 }
 
 
-    // TODO optimize later
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, t_i: &Interval) -> Option<HitRecord>;
 }
 
 pub struct HitRecord {
@@ -229,4 +229,26 @@ impl HitRecord {
         self.is_front_face = ray.direction().dot(outward_normal) < 0.0;
         self.normal = if self.is_front_face { outward_normal.clone() } else { -outward_normal };
     }
+}
+
+
+pub struct Interval {
+    pub min: f32,
+    pub max: f32
+}
+impl Interval {
+    pub fn new(min: f32, max: f32) -> Self {
+        Self { min, max }
+    }
+    pub fn len(&self) -> f32 {
+        self.max - self.min
+    }
+    pub fn contains(&self, x: f32) -> bool {
+        self.min <= x && x <= self.max
+    }
+    pub fn surrounds(&self, x: f32) -> bool {
+        self.min < x && x < self.max
+    }
+    const EMPTY: Interval = Self { min: f32::INFINITY, max: f32::NEG_INFINITY };
+    const UNIVERSE: Interval = Self { min: f32::NEG_INFINITY, max: f32::INFINITY };
 }

@@ -1,5 +1,5 @@
 
-use crate::{datatypes::{HitRecord, Hittable, Point3, Ray}, utils::HitUtil};
+use crate::{datatypes::{HitRecord, Hittable, Interval, Point3, Ray}, utils::HitUtil};
 
 #[derive(Clone)]
 pub enum Hittables {
@@ -21,7 +21,7 @@ impl Sphere {
     }
 }
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_i: &Interval) -> Option<HitRecord> {
         let oc = &self.center - ray.origin();
         let a = ray.direction().len_sqr();
         let h = ray.direction().dot(&oc);
@@ -35,9 +35,9 @@ impl Hittable for Sphere {
         let sqrtd = f32::sqrt(discriminant);
 
         let mut root = (h - sqrtd) / a;
-        if root <= t_min || t_max <= root {
+        if !t_i.contains(root) {
             root = (h + sqrtd) / a;
-            if root < t_min || t_max < root {
+            if !t_i.surrounds(root) {
                 return None;
             }
         }
@@ -66,16 +66,12 @@ impl HittableList {
     }
 }
 impl Hittable for HittableList {
-    fn hit(&self, ray: &crate::datatypes::Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-        // let mut tmp_rec: HitRecord;
-        // let mut hit_anything = false;
-        let mut closest_so_far = t_max;
+    fn hit(&self, ray: &crate::datatypes::Ray, t_i: &Interval) -> Option<HitRecord> {
+        let mut closest_so_far = t_i.max;
         let mut rec: Option<HitRecord> = None;
 
         for object in &self.objects {
-            if let Some(hr) = HitUtil::hit(object, ray, t_min, t_max) {
-            // if let Some(hr) = object.hit(ray, t_min, t_max) {
-                // hit_anything = true;
+            if let Some(hr) = HitUtil::hit(object, ray, t_i) {
                 if hr.t < closest_so_far {
                     closest_so_far = hr.t;
                     rec = Some(hr);

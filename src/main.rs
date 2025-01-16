@@ -3,12 +3,12 @@ mod datatypes;
 mod utils;
 mod tests;
 mod shapes;
-mod constants;
 
 use std::thread;
 use std::time;
 use datatypes::Color3;
 use datatypes::Hittable;
+use datatypes::Interval;
 use datatypes::Point3;
 use datatypes::Ray;
 use datatypes::Vec3;
@@ -66,7 +66,8 @@ fn main() {
 }
 
 fn ray_color(ray: &Ray, world: &HittableList) -> Color3 {
-    match world.hit(ray, 0.0, constants::INFINITY) {
+    let interval = Interval::new(0.0, f32::INFINITY);
+    match world.hit(ray, &interval) {
         Some(hr) => {
             0.5 * (hr.normal + Color3::one())
         },

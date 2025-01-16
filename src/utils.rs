@@ -1,9 +1,13 @@
 
-
+use std::f32::consts::PI;
 
 use image::RgbImage;
 
-use crate::{constants, datatypes::{Color3, HitRecord, Hittable}, shapes::Hittables};
+use crate::datatypes::Interval;
+use crate::shapes::Hittables;
+use crate::datatypes::Hittable;
+use crate::datatypes::HitRecord;
+use crate::datatypes::Color3;
 
 
 pub struct ColorUtil;
@@ -22,7 +26,6 @@ impl ColorUtil {
         let ig = (255.999 * color.y) as u8;
         let ib = (255.999 * color.z) as u8;
         image::Rgb([ir, ig, ib])
-        // image::Rgb([pixel[0] as u8, pixel[1] as u8, pixel[2] as u8])
     }
 }
 
@@ -34,7 +37,6 @@ impl ImageUtil {
         let mut image: RgbImage = RgbImage::new(width, height);
         for j in 0..height {
             for i in 0..width {
-                // let pixel = &pixels[j * im_width as usize + i];
                 let pixel = &pixels[(j * width + i) as usize];
                 image.put_pixel(i, j, ColorUtil::get_pixel(pixel));
             }
@@ -64,10 +66,10 @@ impl ImageUtil {
 
 pub struct HitUtil;
 impl HitUtil {
-    pub fn hit(hittable: &Hittables, ray: &crate::datatypes::Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+    pub fn hit(hittable: &Hittables, ray: &crate::datatypes::Ray, t_i: &Interval) -> Option<HitRecord> {
         match hittable {
-            Hittables::Sphere(sphere) => sphere.hit(ray, t_min, t_max),
-            Hittables::HittableList(list) => list.hit(ray, t_min, t_max),
+            Hittables::Sphere(sphere) => sphere.hit(ray, t_i),
+            Hittables::HittableList(list) => list.hit(ray, t_i),
         }
     }
 }
@@ -76,6 +78,6 @@ impl HitUtil {
 pub struct MathUtil;
 impl MathUtil {
     pub fn degrees_to_radians(degrees: f32) -> f32 {
-        degrees * constants::PI / 180.0
+        degrees * PI / 180.0
     }
 }
