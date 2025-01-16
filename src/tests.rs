@@ -125,3 +125,74 @@ mod color_util_tests {
         assert_eq!(pixel[2], 230);
     }
 }
+
+#[cfg(test)]
+mod ray_tests {
+    use crate::datatypes::*;
+
+    #[test]
+    fn test_ray_at() {
+        let origin = Point3::new(1.0, 2.0, 3.0);
+        let direction = Vec3::new(4.0, 5.0, 6.0);
+        let ray = Ray::new(origin, direction);
+        let point = ray.at(2.0);
+        assert_eq!(point.x, 9.0);
+        assert_eq!(point.y, 12.0);
+        assert_eq!(point.z, 15.0);
+    }
+}
+
+#[cfg(test)]
+mod hit_record_tests {
+    use crate::datatypes::*;
+
+    #[test]
+    fn test_set_face_normal() {
+        let p = Point3::new(1.0, 2.0, 3.0);
+        let normal = Vec3::new(4.0, 5.0, 6.0);
+        let t = 7.0;
+        let mut hit_record = HitRecord::new(p, normal, t);
+        let ray = Ray::new(Point3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 0.0, 0.0));
+        let outward_normal = Vec3::new(-1.0, 0.0, 0.0);
+        hit_record.set_face_normal(&ray, &outward_normal);
+        assert!(hit_record.is_front_face);
+        assert_eq!(hit_record.normal, outward_normal);
+    }
+}
+
+#[cfg(test)]
+mod interval_tests {
+    use crate::datatypes::*;
+
+    #[test]
+    fn test_interval_len() {
+        let interval = Interval::new(1.0, 2.0);
+        assert_eq!(interval.len(), 1.0);
+    }
+
+    #[test]
+    fn test_interval_contains() {
+        let interval = Interval::new(1.0, 2.0);
+        assert!(interval.contains(1.5));
+        assert!(!interval.contains(2.5));
+    }
+
+    #[test]
+    fn test_interval_surrounds() {
+        let interval = Interval::new(1.0, 2.0);
+        assert!(interval.surrounds(1.5));
+        assert!(!interval.surrounds(1.0));
+    }
+}
+
+#[cfg(test)]
+mod math_util_tests {
+    use crate::utils::MathUtil;
+
+    #[test]
+    fn test_degrees_to_radians() {
+        let degrees = 180.0;
+        let radians = MathUtil::degrees_to_radians(degrees);
+        assert!((radians - std::f32::consts::PI).abs() < 1e-6);
+    }
+}

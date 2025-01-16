@@ -14,7 +14,7 @@ use std::ops::DivAssign;
 pub type Point3 = Vec3;
 pub type Color3 = Vec3;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Vec3 { 
     pub x: f32,
     pub y: f32,
