@@ -4,6 +4,9 @@ use std::f64::consts::PI;
 use image::RgbImage;
 
 use crate::datatypes::Interval;
+use crate::datatypes::Ray;
+use crate::materials::Material;
+use crate::materials::Materials;
 use crate::shapes::Hittables;
 use crate::datatypes::Hittable;
 use crate::datatypes::HitRecord;
@@ -74,6 +77,17 @@ impl HitUtil {
         match hittable {
             Hittables::Sphere(sphere) => sphere.hit(ray, t_i),
             Hittables::HittableList(list) => list.hit(ray, t_i),
+        }
+    }
+}
+
+
+pub struct MatUtil;
+impl MatUtil {
+    pub fn scatter(material: &Materials, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)> {
+        match material {
+            Materials::DifuseLamb(mat) => mat.scatter(ray, hit_rec),
+            Materials::Metal(mat) => mat.scatter(ray, hit_rec),
         }
     }
 }

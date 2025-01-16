@@ -1,5 +1,5 @@
 
-use crate::{datatypes::{HitRecord, Hittable, Interval, Point3, Ray}, utils::HitUtil};
+use crate::{datatypes::{HitRecord, Hittable, Interval, Point3, Ray}, materials::Materials, utils::HitUtil};
 
 #[derive(Clone)]
 pub enum Hittables {
@@ -10,13 +10,15 @@ pub enum Hittables {
 #[derive(Clone)]
 pub struct Sphere {
     pub radius: f64,
-    pub center: Point3
+    pub center: Point3,
+    pub material: Materials
 }
 impl Sphere {
-    pub fn new(radius: f64, x: f64, y: f64, z: f64) -> Sphere {
+    pub fn new(radius: f64, x: f64, y: f64, z: f64, material: Materials) -> Sphere {
         Sphere {
             radius,
-            center: Point3::new(x, y, z)
+            center: Point3::new(x, y, z),
+            material
         }
     }
 }
@@ -43,7 +45,7 @@ impl Hittable for Sphere {
         }
 
         let p = ray.at(root);
-        let mut hit_rec = HitRecord::new(p.clone(), (&p - &self.center) / self.radius, root);
+        let mut hit_rec = HitRecord::new(p.clone(), (&p - &self.center) / self.radius, root, self.material.clone());
         let outward_normal = (&p - &self.center) / self.radius;
             // TODO: consider doing on init.
         hit_rec.set_face_normal(ray, &outward_normal);

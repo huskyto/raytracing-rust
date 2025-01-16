@@ -148,14 +148,14 @@ mod ray_tests {
 
 #[cfg(test)]
 mod hit_record_tests {
-    use crate::datatypes::*;
+    use crate::{datatypes::*, materials::{MatLambertian, Materials}};
 
     #[test]
     fn test_set_face_normal() {
         let p = Point3::new(1.0, 2.0, 3.0);
         let normal = Vec3::new(4.0, 5.0, 6.0);
         let t = 7.0;
-        let mut hit_record = HitRecord::new(p, normal, t);
+        let mut hit_record = HitRecord::new(p, normal, t, Materials::DifuseLamb(MatLambertian::GRAY));
         let ray = Ray::new(Point3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 0.0, 0.0));
         let outward_normal = Vec3::new(-1.0, 0.0, 0.0);
         hit_record.set_face_normal(&ray, &outward_normal);
@@ -204,7 +204,8 @@ mod math_util_tests {
 #[cfg(test)]
 mod camera_tests {
     use crate::camera::Camera;
-    use crate::datatypes::{Point3, Vec3, Color3, Ray};
+    use crate::datatypes::{Color3, Point3, Ray, Vec3};
+    use crate::materials::{MatLambertian, Materials};
     use crate::shapes::{HittableList, Hittables, Sphere};
 
     #[test]
@@ -225,7 +226,7 @@ mod camera_tests {
         let camera = Camera::new(aspect_ratio, im_width, 1, 10);
         let ray = Ray::new(Point3::zero(), Vec3::new(0.0, 0.0, -1.0));
         let mut world = HittableList::new();
-        world.add(Hittables::Sphere(Sphere::new(0.5, 0.0, 0.0, -1.0)));
+        world.add(Hittables::Sphere(Sphere::new(0.5, 0.0, 0.0, -1.0, Materials::DifuseLamb(MatLambertian::GRAY))));
         let color = camera.ray_color(&ray, 10, &world);
         assert!((color.x - 0.5).abs() < 0.02);
         assert!((color.y - 0.5).abs() < 0.02);

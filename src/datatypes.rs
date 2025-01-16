@@ -11,6 +11,7 @@ use std::ops::MulAssign;
 use std::ops::Div;
 use std::ops::DivAssign;
 
+use crate::materials::Materials;
 use crate::utils::MathUtil;
 
 pub type Point3 = Vec3;
@@ -81,6 +82,13 @@ impl Vec3 {
     }
     pub fn unit(&self) -> Vec3 {
         self / self.len()
+    }
+    pub fn is_near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
+    pub fn reflect(&self, normal: &Vec3) -> Vec3 {
+        self - &(2.0 * normal * self.dot(normal))
     }
 }
 
@@ -241,12 +249,13 @@ pub trait Hittable {
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
+    pub material: Materials,
     pub t: f64,
     pub is_front_face: bool
 }
 impl HitRecord {
-    pub fn new(p: Point3, normal: Vec3, t: f64) -> Self {
-        Self { p, normal, t, is_front_face: false }
+    pub fn new(p: Point3, normal: Vec3, t: f64, material: Materials) -> Self {
+        Self { p, normal, material, t, is_front_face: false }
     }
     pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: &Vec3) {
                 // Sets the hit record normal vector.
@@ -282,3 +291,4 @@ impl Interval {
     const EMPTY: Interval = Self { min: f64::INFINITY, max: f64::NEG_INFINITY };
     const UNIVERSE: Interval = Self { min: f64::NEG_INFINITY, max: f64::INFINITY };
 }
+

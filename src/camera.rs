@@ -8,6 +8,7 @@ use crate::datatypes::Interval;
 use crate::datatypes::Color3;
 use crate::datatypes::Ray;
 use crate::datatypes::Hittable;
+use crate::utils::MatUtil;
 use crate::utils::MathUtil;
 
 pub struct Camera {
@@ -68,10 +69,15 @@ impl Camera {
         let interval = Interval::new(0.001, f64::INFINITY);
         match world.hit(ray, &interval) {
             Some(hr) => {
-                let direction = hr.normal + Vec3::random_unit();
-                0.5 * self.ray_color(&Ray::new(hr.p, direction), bounces - 1, world)
+                match MatUtil::scatter(&hr.material, ray, &hr) {
+                    Some((att, sc_ray)) => {
+                        att * self.ray_color(&sc_ray, bounces - 1, world)
+                    },
+                    None => Color3::zero(),
+                }
             },
             None => {
+                    // Sky box
                 let unit_dir = ray.direction().unit();
                 let a = 0.5 * (unit_dir.y + 1.0);
                 (1.0 - a) * Color3::one() + (a * Color3::new(0.5, 0.7, 1.0))
