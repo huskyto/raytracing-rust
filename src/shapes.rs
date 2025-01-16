@@ -9,11 +9,11 @@ pub enum Hittables {
 
 #[derive(Clone)]
 pub struct Sphere {
-    pub radius: f32,
+    pub radius: f64,
     pub center: Point3
 }
 impl Sphere {
-    pub fn new(radius: f32, x: f32, y: f32, z: f32) -> Sphere {
+    pub fn new(radius: f64, x: f64, y: f64, z: f64) -> Sphere {
         Sphere {
             radius,
             center: Point3::new(x, y, z)
@@ -32,7 +32,7 @@ impl Hittable for Sphere {
             return None;
         }
 
-        let sqrtd = f32::sqrt(discriminant);
+        let sqrtd = f64::sqrt(discriminant);
 
         let mut root = (h - sqrtd) / a;
         if !t_i.contains(root) {

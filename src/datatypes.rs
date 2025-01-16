@@ -1,5 +1,5 @@
 
-use core::f32;
+use core::f64;
 use std::fmt::Display;
 use std::ops::Sub;
 use std::ops::Neg;
@@ -11,14 +11,16 @@ use std::ops::MulAssign;
 use std::ops::Div;
 use std::ops::DivAssign;
 
+use crate::utils::MathUtil;
+
 pub type Point3 = Vec3;
 pub type Color3 = Vec3;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Vec3 { 
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 impl Vec3 {
@@ -37,16 +39,17 @@ impl Vec3 {
     pub fn z_u() -> Self {
         Self::new(0.0, 0.0, 1.0)
     }
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
     pub fn len_sqr(&self) -> f32 {
+    pub fn len_sqr(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
-    pub fn len(&self) -> f32 {
-        f32::sqrt(self.len_sqr())
+    pub fn len(&self) -> f64 {
+        f64::sqrt(self.len_sqr())
     }
-    pub fn dot(&self, rhs: &Vec3) -> f32 {
+    pub fn dot(&self, rhs: &Vec3) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
     pub fn cross(&self, rhs: Vec3) -> Vec3 {
@@ -60,7 +63,7 @@ impl Vec3 {
 }
 
 impl Index<usize> for Vec3 {
-    type Output = f32;
+    type Output = f64;
 
     fn index(&self, index: usize) -> &Self::Output {
         if index == 0 { &self.x }
@@ -124,58 +127,58 @@ impl Mul<Vec3> for Vec3 {
         Vec3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }
-impl Mul<f32> for Vec3 {
+impl Mul<f64> for Vec3 {
     type Output = Vec3;
 
-    fn mul(self, rhs: f32) -> Self::Output {
+    fn mul(self, rhs: f64) -> Self::Output {
         Self::new(self.x * rhs, self.y * rhs, self.z * rhs)
     }
 }
-impl Mul<f32> for &Vec3 {
+impl Mul<f64> for &Vec3 {
     type Output = Vec3;
 
-    fn mul(self, rhs: f32) -> Self::Output {
+    fn mul(self, rhs: f64) -> Self::Output {
         Vec3::new(self.x * rhs, self.y * rhs, self.z * rhs)
     }
 }
-impl Mul<&Vec3> for f32 {
+impl Mul<&Vec3> for f64 {
     type Output = Vec3;
 
     fn mul(self, rhs: &Vec3) -> Self::Output {
         rhs * self
     }
 }
-impl Mul<Vec3> for f32 {
+impl Mul<Vec3> for f64 {
     type Output = Vec3;
 
     fn mul(self, rhs: Vec3) -> Self::Output {
         rhs * self
     }
 }
-impl MulAssign<f32> for Vec3 {
-    fn mul_assign(&mut self, rhs: f32) {
+impl MulAssign<f64> for Vec3 {
+    fn mul_assign(&mut self, rhs: f64) {
         self.x *= rhs;
         self.y *= rhs;
         self.z *= rhs;
     }
 }
 
-impl Div<f32> for Vec3 {
+impl Div<f64> for Vec3 {
     type Output = Vec3;
 
-    fn div(self, rhs: f32) -> Self::Output {
+    fn div(self, rhs: f64) -> Self::Output {
         self * (1.0 / rhs)
     }
 }
-impl Div<f32> for &Vec3 {
+impl Div<f64> for &Vec3 {
     type Output = Vec3;
 
-    fn div(self, rhs: f32) -> Self::Output {
+    fn div(self, rhs: f64) -> Self::Output {
         self * (1.0 / rhs)
     }
 }
-impl DivAssign<f32> for Vec3 {
-    fn div_assign(&mut self, rhs: f32) {
+impl DivAssign<f64> for Vec3 {
+    fn div_assign(&mut self, rhs: f64) {
         // self + self;
         *self *= 1.0/rhs;
     }
@@ -203,7 +206,7 @@ impl Ray {
     pub fn direction(&self) -> &Vec3 {
         &self.direction
     }
-    pub fn at(&self, t: f32) -> Point3 {
+    pub fn at(&self, t: f64) -> Point3 {
         &self.origin + &(&self.direction * t)
     }
 }
@@ -216,11 +219,11 @@ pub trait Hittable {
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
-    pub t: f32,
+    pub t: f64,
     pub is_front_face: bool
 }
 impl HitRecord {
-    pub fn new(p: Point3, normal: Vec3, t: f32) -> Self {
+    pub fn new(p: Point3, normal: Vec3, t: f64) -> Self {
         Self { p, normal, t, is_front_face: false }
     }
     pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: &Vec3) {
@@ -233,27 +236,27 @@ impl HitRecord {
 
 
 pub struct Interval {
-    pub min: f32,
-    pub max: f32
+    pub min: f64,
+    pub max: f64
 }
 impl Interval {
-    pub fn new(min: f32, max: f32) -> Self {
+    pub fn new(min: f64, max: f64) -> Self {
         Self { min, max }
     }
-    pub fn len(&self) -> f32 {
+    pub fn len(&self) -> f64 {
         self.max - self.min
     }
-    pub fn contains(&self, x: f32) -> bool {
+    pub fn contains(&self, x: f64) -> bool {
         self.min <= x && x <= self.max
     }
-    pub fn surrounds(&self, x: f32) -> bool {
+    pub fn surrounds(&self, x: f64) -> bool {
         self.min < x && x < self.max
     }
-    pub fn clamp(&self, x: f32) -> f32 {
+    pub fn clamp(&self, x: f64) -> f64 {
         if x < self.min { self.min }
         else if x > self.max { self.max }
         else { x }
     }
-    const EMPTY: Interval = Self { min: f32::INFINITY, max: f32::NEG_INFINITY };
-    const UNIVERSE: Interval = Self { min: f32::NEG_INFINITY, max: f32::INFINITY };
+    const EMPTY: Interval = Self { min: f64::INFINITY, max: f64::NEG_INFINITY };
+    const UNIVERSE: Interval = Self { min: f64::NEG_INFINITY, max: f64::INFINITY };
 }

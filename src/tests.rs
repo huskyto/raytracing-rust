@@ -86,7 +86,7 @@ mod vec3_tests {
     }
 
     #[test]
-    fn test_mul_f32() {
+    fn test_mul_f64() {
         let v = Vec3::new(1.0, 2.0, 3.0);
         let prod = v * 2.0;
         assert_eq!(prod.x, 2.0);
@@ -95,7 +95,7 @@ mod vec3_tests {
     }
 
     #[test]
-    fn test_div_f32() {
+    fn test_div_f64() {
         let v = Vec3::new(2.0, 4.0, 6.0);
         let div = v / 2.0;
         assert_eq!(div.x, 1.0);
@@ -115,18 +115,18 @@ mod color_util_tests {
         let color_str = ColorUtil::get_color_str(&color);
         let values: Vec<&str> = color_str.split_whitespace().collect();
         assert_eq!(values.len(), 3);
-        assert!((values[0].parse::<u32>().unwrap() as f32 - 127.0).abs() < 2.0);
-        assert!((values[1].parse::<u32>().unwrap() as f32 - 179.0).abs() < 2.0);
-        assert!((values[2].parse::<u32>().unwrap() as f32 - 230.0).abs() < 2.0);
+        assert!((values[0].parse::<u32>().unwrap() as f64 - 127.0).abs() < 2.0);
+        assert!((values[1].parse::<u32>().unwrap() as f64 - 179.0).abs() < 2.0);
+        assert!((values[2].parse::<u32>().unwrap() as f64 - 230.0).abs() < 2.0);
     }
 
     #[test]
     fn test_get_pixel() {
         let color = Color3::new(0.5, 0.7, 0.9);
         let pixel = ColorUtil::get_pixel(&color);
-        assert!((pixel[0] as f32 - 127.0).abs() < 2.0);
-        assert!((pixel[1] as f32 - 179.0).abs() < 2.0);
-        assert!((pixel[2] as f32 - 230.0).abs() < 2.0);
+        assert!((pixel[0] as f64 - 127.0).abs() < 2.0);
+        assert!((pixel[1] as f64 - 179.0).abs() < 2.0);
+        assert!((pixel[2] as f64 - 230.0).abs() < 2.0);
     }
 }
 
@@ -197,7 +197,7 @@ mod math_util_tests {
     fn test_degrees_to_radians() {
         let degrees = 180.0;
         let radians = MathUtil::degrees_to_radians(degrees);
-        assert!((radians - std::f32::consts::PI).abs() < 1e-6);
+        assert!((radians - std::f64::consts::PI).abs() < 1e-6);
     }
 }
 

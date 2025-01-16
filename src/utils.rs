@@ -1,5 +1,5 @@
 
-use std::f32::consts::PI;
+use std::f64::consts::PI;
 
 use image::RgbImage;
 
@@ -78,13 +78,13 @@ impl HitUtil {
 
 pub struct MathUtil;
 impl MathUtil {
-    pub fn degrees_to_radians(degrees: f32) -> f32 {
+    pub fn degrees_to_radians(degrees: f64) -> f64 {
         degrees * PI / 180.0
     }
-    pub fn rand() -> f32 {
-        rand::random::<f32>()
+    pub fn rand() -> f64 {
+        rand::random::<f64>()
     }
-    pub fn rand_ran(min: f32, max: f32) -> f32 {
+    pub fn rand_ran(min: f64, max: f64) -> f64 {
         min + (max - min) * MathUtil::rand()
     }
 }

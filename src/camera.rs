@@ -11,9 +11,9 @@ use crate::datatypes::Hittable;
 use crate::utils::MathUtil;
 
 pub struct Camera {
-    aspect_ratio: f32,  // Aspect ratio
+    aspect_ratio: f64,  // Aspect ratio
     pixel_samples: u32, // Number of samples per pixel
-    pixel_sample_scale: f32, // Scale factor for pixel samples
+    pixel_sample_scale: f64, // Scale factor for pixel samples
     im_width: u32,      // Rendered image width
     im_height: u32,     // Rendered image height
     center: Point3,     // Camera center
@@ -23,28 +23,28 @@ pub struct Camera {
 
 }
 impl Camera {
-    pub fn new(aspect_ratio: f32, im_width: u32, pixel_samples: u32) -> Self {
-        let im_height = u32::max((im_width as f32 / aspect_ratio) as u32, 1);
+    pub fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32) -> Self {
+        let im_height = u32::max((im_width as f64 / aspect_ratio) as u32, 1);
         let center = Point3::zero();
 
                 // Viewport Dimensions
         let focal_len = 1.0;
         let vp_height = 2.0;
-        let vp_width = vp_height * (im_width as f32 / im_height as f32);
+        let vp_width = vp_height * (im_width as f64 / im_height as f64);
 
                 // Viewport Dimensions
         let vp_u = Vec3::new(vp_width, 0.0, 0.0);
         let vp_v = Vec3:: new(0.0, -vp_height, 0.0);
 
                 // Pixel Delta Vectors
-        let px_delta_u = &vp_u / im_width as f32;
-        let px_delta_v = &vp_v / im_height as f32;
+        let px_delta_u = &vp_u / im_width as f64;
+        let px_delta_v = &vp_v / im_height as f64;
 
         
         let vp_upper_left = &center - &Vec3::new(0.0, 0.0, focal_len) - &vp_u / 2.0 - &vp_v / 2.0;
         let px_00_loc = &vp_upper_left + &(0.5 * (&px_delta_u + &px_delta_v));
 
-        let pixel_sample_scale = 1.0 / pixel_samples as f32;
+        let pixel_sample_scale = 1.0 / pixel_samples as f64;
 
         Self {
             aspect_ratio,
@@ -59,10 +59,12 @@ impl Camera {
         }
     }
     pub fn ray_color(&self, ray: &Ray, world: &HittableList) -> Color3 {
-        let interval = Interval::new(0.0, f32::INFINITY);
+        let interval = Interval::new(0.0, f64::INFINITY);
         match world.hit(ray, &interval) {
             Some(hr) => {
-                0.5 * (hr.normal + Color3::one())
+                let direction = Vec3::random_on_hemisphere(&hr.normal);
+                0.5 * self.ray_color(&Ray::new(hr.p, direction), world)
+                // 0.5 * (hr.normal + Color3::one())
             },
             None => {
                 let unit_dir = ray.direction().unit();
@@ -92,8 +94,8 @@ impl Camera {
     pub fn get_ray(&self, i: u32, j: u32) -> Ray {
         let offset = Self::sample_square();
         let pixel_sample = &self.px_00_loc
-                    + &((i as f32 + offset.x) * &self.px_delta_u)
-                    + (j as f32 + offset.y) * &self.px_delta_v;
+                    + &((i as f64 + offset.x) * &self.px_delta_u)
+                    + (j as f64 + offset.y) * &self.px_delta_v;
 
         let ray_origin = &self.center;
         let ray_dir = &pixel_sample - ray_origin;
