@@ -14,6 +14,7 @@ pub struct Camera {
     aspect_ratio: f64,  // Aspect ratio
     pixel_samples: u32, // Number of samples per pixel
     pixel_sample_scale: f64, // Scale factor for pixel samples
+    max_bounces: u32,   // Maximum number of bounces
     im_width: u32,      // Rendered image width
     im_height: u32,     // Rendered image height
     center: Point3,     // Camera center
@@ -23,7 +24,7 @@ pub struct Camera {
 
 }
 impl Camera {
-    pub fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32) -> Self {
+    pub fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32) -> Self {
         let im_height = u32::max((im_width as f64 / aspect_ratio) as u32, 1);
         let center = Point3::zero();
 
@@ -50,6 +51,7 @@ impl Camera {
             aspect_ratio,
             pixel_samples,
             pixel_sample_scale,
+            max_bounces,
             im_width,
             im_height,
             center,
@@ -58,12 +60,16 @@ impl Camera {
             px_delta_v,
         }
     }
-    pub fn ray_color(&self, ray: &Ray, world: &HittableList) -> Color3 {
-        let interval = Interval::new(0.0, f64::INFINITY);
+    pub fn ray_color(&self, ray: &Ray, bounces: u32, world: &HittableList) -> Color3 {
+        if bounces == 0 {
+            return Color3::zero();
+        }
+
+        let interval = Interval::new(0.001, f64::INFINITY);
         match world.hit(ray, &interval) {
             Some(hr) => {
                 let direction = Vec3::random_on_hemisphere(&hr.normal);
-                0.5 * self.ray_color(&Ray::new(hr.p, direction), world)
+                0.5 * self.ray_color(&Ray::new(hr.p, direction), bounces - 1, world)
                 // 0.5 * (hr.normal + Color3::one())
             },
             None => {
@@ -80,7 +86,7 @@ impl Camera {
                 let mut pixel = Color3::zero();
                 for _sample in 0..self.pixel_samples {
                     let ray = self.get_ray(i, j);
-                    pixel += self.ray_color(&ray, world);
+                    pixel += self.ray_color(&ray, self.max_bounces, world);
                 }
                 pixels.push(pixel * self.pixel_sample_scale);
             }
