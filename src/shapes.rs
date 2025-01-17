@@ -1,5 +1,11 @@
 
-use crate::{datatypes::{HitRecord, Hittable, Interval, Point3, Ray}, materials::Materials, utils::HitUtil};
+use crate::datatypes::Ray;
+use crate::datatypes::Point3;
+use crate::datatypes::Interval;
+use crate::datatypes::Hittable;
+use crate::datatypes::HitRecord;
+use crate::materials::Materials;
+use crate::utils::HitUtil;
 
 #[derive(Clone)]
 pub enum Hittables {

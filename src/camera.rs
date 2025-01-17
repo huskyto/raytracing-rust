@@ -1,13 +1,15 @@
 
+use indicatif::ProgressBar;
 use indicatif::ProgressIterator;
+use rayon::prelude::*;
 
-use crate::datatypes::Point3;
-use crate::datatypes::Vec3;
-use crate::shapes::HittableList;
-use crate::datatypes::Interval;
-use crate::datatypes::Color3;
 use crate::datatypes::Ray;
+use crate::datatypes::Vec3;
+use crate::datatypes::Point3;
+use crate::datatypes::Color3;
+use crate::datatypes::Interval;
 use crate::datatypes::Hittable;
+use crate::shapes::HittableList;
 use crate::utils::MatUtil;
 use crate::utils::MathUtil;
 

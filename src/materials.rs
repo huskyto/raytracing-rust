@@ -1,5 +1,8 @@
 
-use crate::datatypes::{Color3, HitRecord, Ray, Vec3};
+use crate::datatypes::Ray;
+use crate::datatypes::Vec3;
+use crate::datatypes::Color3;
+use crate::datatypes::HitRecord;
 
 
 

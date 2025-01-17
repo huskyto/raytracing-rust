@@ -3,14 +3,14 @@ use std::f64::consts::PI;
 
 use image::RgbImage;
 
-use crate::datatypes::Interval;
 use crate::datatypes::Ray;
+use crate::datatypes::Color3;
+use crate::datatypes::Hittable;
+use crate::datatypes::Interval;
+use crate::datatypes::HitRecord;
+use crate::shapes::Hittables;
 use crate::materials::Material;
 use crate::materials::Materials;
-use crate::shapes::Hittables;
-use crate::datatypes::Hittable;
-use crate::datatypes::HitRecord;
-use crate::datatypes::Color3;
 
 
 pub struct ColorUtil;

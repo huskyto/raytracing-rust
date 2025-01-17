@@ -1,18 +1,18 @@
 
 use core::f64;
-use std::fmt::Display;
 use std::ops::Sub;
 use std::ops::Neg;
-use std::ops::Index;
 use std::ops::Add;
-use std::ops::AddAssign;
 use std::ops::Mul;
-use std::ops::MulAssign;
 use std::ops::Div;
+use std::ops::Index;
+use std::ops::AddAssign;
+use std::ops::MulAssign;
 use std::ops::DivAssign;
+use std::fmt::Display;
 
-use crate::materials::Materials;
 use crate::utils::MathUtil;
+use crate::materials::Materials;
 
 pub type Point3 = Vec3;
 pub type Color3 = Vec3;
