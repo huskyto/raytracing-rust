@@ -88,6 +88,7 @@ impl MatUtil {
         match material {
             Materials::DifuseLamb(mat) => mat.scatter(ray, hit_rec),
             Materials::Metal(mat) => mat.scatter(ray, hit_rec),
+            Materials::Dielectric(mat) => mat.scatter(ray, hit_rec),
         }
     }
 }

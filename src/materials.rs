@@ -9,7 +9,8 @@ use crate::datatypes::HitRecord;
 #[derive(Clone)]
 pub enum Materials {
     DifuseLamb(MatLambertian),
-    Metal(MatMetal)
+    Metal(MatMetal),
+    Dielectric(MatDielectric)
 }
 
 
@@ -34,7 +35,7 @@ impl Material for MatLambertian {
             sc_direction = hit_rec.normal.clone();
         }
         let sc_ray = Ray::new(hit_rec.p.clone(), sc_direction);
-        Option::Some((self.albedo.clone(), sc_ray))
+        Some((self.albedo.clone(), sc_ray))
     }
 }
 
@@ -61,5 +62,26 @@ impl Material for MatMetal {
         else {
             Some((self.albedo.clone(), sc_ray))
         }
+    }
+}
+
+
+#[derive(Clone)]
+pub struct MatDielectric {
+    pub ir: f64
+}
+impl MatDielectric {
+    pub fn new(ir: f64) -> Self {
+        MatDielectric { ir }
+    }
+}
+impl Material for MatDielectric {
+    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)> {
+        let attenuation = Color3::one();
+        let ri = if hit_rec.is_front_face { 1.0 / self.ir } else { self.ir };
+        let unit_dir = ray.direction().unit();
+        let refracted = unit_dir.refract(&hit_rec.normal, ri);
+        let sc_ray = Ray::new( hit_rec.p.clone(), refracted);
+        Some((attenuation, sc_ray))
     }
 }
