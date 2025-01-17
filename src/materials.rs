@@ -3,6 +3,7 @@ use crate::datatypes::Ray;
 use crate::datatypes::Vec3;
 use crate::datatypes::Color3;
 use crate::datatypes::HitRecord;
+use crate::utils::MathUtil;
 
 
 
@@ -74,6 +75,11 @@ impl MatDielectric {
     pub fn new(ir: f64) -> Self {
         MatDielectric { ir }
     }
+    fn reflectance(cos: f64, ir: f64) -> f64 {
+        let mut r0 = (1.0 - ir) / (1.0 + ir);
+        r0 = r0 * r0;
+        r0 + (1.0 - r0) * f64::powi(1.0 - cos, 5)
+    }
 }
 impl Material for MatDielectric {
     fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)> {
@@ -86,7 +92,7 @@ impl Material for MatDielectric {
 
         let cannot_refract = ri * sin_theta > 1.0;
 
-        let direction = if cannot_refract {
+        let direction = if cannot_refract || Self::reflectance(cos_theta, ri) > MathUtil::rand() {
             unit_dir.reflect(&hit_rec.normal)
         }
         else {
