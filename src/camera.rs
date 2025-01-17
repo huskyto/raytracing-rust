@@ -24,29 +24,56 @@ pub struct Camera {
     px_00_loc: Point3,  // Location of pixel (0, 0)
     px_delta_u: Vec3,   // Pixel offset to right
     px_delta_v: Vec3,   // Pixel offset down
-
+    vfov: f64,          // Vertical field of view
+    u: Vec3,            // Camera basis vectors
+    v: Vec3,
+    w: Vec3,
+    defocus_angle: f64, // Defocus disk angle
+    defocus_dsk_u: Vec3,// Defocus disk vectors
+    defocus_dsk_v: Vec3,
 }
 impl Camera {
-    pub fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32) -> Self {
+    // pub fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32, vfov: f64) -> Self {
+    pub fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32,
+                    vfov: f64, lookfrom: Point3, lookat: Point3, vup: Vec3, defocus_angle: f64, focus_dist: f64) -> Self {
         let im_height = u32::max((im_width as f64 / aspect_ratio) as u32, 1);
-        let center = Point3::zero();
+        // let center = Point3::zero();
+        let center = lookfrom.clone();      // TODO maybe remove assign
 
                 // Viewport Dimensions
-        let focal_len = 1.0;
-        let vp_height = 2.0;
+        // let focal_len = 1.0;
+        // let focal_len = (&lookfrom - &lookat).len();
+        let theta = MathUtil::degrees_to_radians(vfov);
+        let h = f64::tan(theta / 2.0);
+        // let vp_height = 2.0 * h * focal_len;
+        let vp_height = 2.0 * h * focus_dist;
+        // let vp_height = 2.0;
         let vp_width = vp_height * (im_width as f64 / im_height as f64);
 
+        let w = (lookfrom - lookat).unit();
+        let u = vup.cross(&w).unit();
+        let v = w.cross(&u);
+
                 // Viewport Dimensions
-        let vp_u = Vec3::new(vp_width, 0.0, 0.0);
-        let vp_v = Vec3:: new(0.0, -vp_height, 0.0);
+        // let vp_u = Vec3::new(vp_width, 0.0, 0.0);
+        // let vp_v = Vec3:: new(0.0, -vp_height, 0.0);
+        let vp_u = vp_width * &u;
+        let vp_v = vp_height * -&v;
 
                 // Pixel Delta Vectors
         let px_delta_u = &vp_u / im_width as f64;
         let px_delta_v = &vp_v / im_height as f64;
 
         
-        let vp_upper_left = &center - &Vec3::new(0.0, 0.0, focal_len) - &vp_u / 2.0 - &vp_v / 2.0;
+        // let vp_upper_left = &center - &Vec3::new(0.0, 0.0, focal_len) - &vp_u / 2.0 - &vp_v / 2.0;
+        // let vp_upper_left = &center - &(focal_len * &w) - vp_u / 2.0 - vp_v / 2.0;
+        let vp_upper_left = &center - &(focus_dist * &w) - vp_u / 2.0 - vp_v / 2.0;
         let px_00_loc = &vp_upper_left + &(0.5 * (&px_delta_u + &px_delta_v));
+
+                // Calculate defocus disk vectors
+        let defocus_radius = focus_dist * f64::tan(MathUtil::degrees_to_radians(defocus_angle / 2.0));
+        let defocus_dsk_u = defocus_radius * &u;
+        let defocus_dsk_v = defocus_radius * &v;
 
         let pixel_sample_scale = 1.0 / pixel_samples as f64;
 
@@ -61,6 +88,13 @@ impl Camera {
             px_00_loc,
             px_delta_u,
             px_delta_v,
+            vfov,
+            u,
+            v,
+            w,
+            defocus_angle,
+            defocus_dsk_u,
+            defocus_dsk_v
         }
     }
     pub fn ray_color(&self, ray: &Ray, bounces: u32, world: &HittableList) -> Color3 {
@@ -158,13 +192,18 @@ impl Camera {
                     + &((i as f64 + offset.x) * &self.px_delta_u)
                     + (j as f64 + offset.y) * &self.px_delta_v;
 
-        let ray_origin = &self.center;
-        let ray_dir = &pixel_sample - ray_origin;
+        // let ray_origin = &self.center;
+        let ray_origin = if self.defocus_angle <= 0.0 { &self.center } else { &self.defocus_disk_sample() };
+        let ray_dir = &pixel_sample - &ray_origin;
 
         Ray::new(ray_origin.clone(), ray_dir)
     }
-    pub fn sample_square() -> Vec3 {
+    fn sample_square() -> Vec3 {
         Vec3::new(MathUtil::rand() - 0.5, MathUtil::rand() - 0.5, 0.0)
+    }
+    fn defocus_disk_sample(&self) -> Point3 {
+        let p = Vec3::random_in_unit_disk();
+        &self.center + &(p.x * &self.defocus_dsk_u) + (p.y * &self.defocus_dsk_v)
     }
     pub fn im_width(&self) -> u32 {
         self.im_width
