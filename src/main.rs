@@ -130,31 +130,30 @@ fn dev_scene() {
 
     let mut world = HittableList::new();
 
-    let mat_ground = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.7, 0.7, 0.2)));
-    let mat_center = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.1, 0.2, 0.5)));
-    let mat_left = Materials::Dielectric(MatDielectric::new(1.5));
-    let mat_bubble = Materials::Dielectric(MatDielectric::new(1.0 / 1.5));
-    let mat_right = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.8, 0.8), 0.1));
+    let mat_ground = MaterialFactory::make_lambertian(Color3::new(0.7, 0.7, 0.2));
+    let mat_center = MaterialFactory::make_lambertian(Color3::new(0.1, 0.2, 0.5));
+    let mat_left = MaterialFactory::make_dielectric(1.5);
+    let mat_bubble = MaterialFactory::make_dielectric(1.0 / 1.5);
+    let mat_right = MaterialFactory::make_metal(Color3::new(0.8, 0.8, 0.8), 0.1);
     let mat_front = MaterialFactory::make_emitter(Color3::one(), 20.0);
 
     for _ in 0..10 {
         let color = Color3::random();
-        let material = Materials::DifuseLamb(MatLambertian::new(color));
+        let material = MaterialFactory::make_lambertian(color);
         let radius = MathUtil::rand_ran(0.25, 1.5);
         let x = MathUtil::rand_ran(-20.0, 20.0);
         let y = MathUtil::rand_ran(5.0, 10.0);
         let z = MathUtil::rand_ran(20.0, -20.0);
-        let sphere = Sphere::new(radius, x, y, z, material);
-        world.add(Hittables::Sphere(sphere));
+        let sphere = ShapeFactory::make_sphere(radius, x, y, z, material);
+        world.add(sphere);
     }
 
-    world.add(Hittables::Sphere(Sphere::new(100.0, 0.0, -100.5, -1.0, mat_ground)));
-    world.add(Hittables::Sphere(Sphere::new(0.5,  0.0, 0.0, -1.2, mat_center)));
-    world.add(Hittables::Sphere(Sphere::new(0.5, -1.0, 0.0, -1.0, mat_left)));
-    world.add(Hittables::Sphere(Sphere::new(0.4, -1.0, 0.0, -1.0, mat_bubble)));
-    world.add(Hittables::Sphere(Sphere::new(0.5,  1.0, 0.0, -1.0, mat_right)));
+    world.add(ShapeFactory::make_sphere(100.0, 0.0, -100.5, -1.0, mat_ground));
+    world.add(ShapeFactory::make_sphere(0.5, 0.0, 0.0, -1.2, mat_center));
+    world.add(ShapeFactory::make_sphere(0.5, -1.0, 0.0, -1.0, mat_left));
+    world.add(ShapeFactory::make_sphere(0.4, -1.0, 0.0, -1.0, mat_bubble));
+    world.add(ShapeFactory::make_sphere(0.5, 1.0, 0.0, -1.0, mat_right));
     world.add(ShapeFactory::make_sphere(0.25, -0.25, 1.0, -0.5, mat_front));
-
 
     let camera = Camera::new(aspect_ratio, im_width, 10000, 50,
             90.0, Point3::zero(), -&Point3::z_u(), Vec3::y_u(),
