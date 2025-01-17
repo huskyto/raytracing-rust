@@ -9,6 +9,8 @@ mod materials;
 use std::time::Instant;
 
 use datatypes::Color3;
+use datatypes::Point3;
+use datatypes::Vec3;
 use materials::MatDielectric;
 use materials::MatMetal;
 use materials::Materials;
@@ -21,6 +23,7 @@ use utils::MathUtil;
 use utils::ImageUtil;
 
 fn main() {
+    make_cover();
     let aspect_ratio = 16.0 / 9.0;
     let im_width: u32 = 800;
 
@@ -63,4 +66,54 @@ fn main() {
 
     let image = ImageUtil::get_rgb_image(pixels, camera.im_width(), camera.im_height());
     let _ = image.save("output.png");
+}
+
+fn make_cover() {
+    let mut world = HittableList::new();
+
+    let ground_material = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.5, 0.5, 0.5)));
+    world.add(Hittables::Sphere(Sphere::new(1000.0, 0.0, -1000.0, -1.0, ground_material)));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = MathUtil::rand();
+            let center = Point3::new(a as f64 + 0.9 * MathUtil::rand(), 0.2, b as f64 + 0.9 * MathUtil::rand());
+
+            if (&center - &Point3::new(4.0, 0.2, 0.0)).len() > 0.9 {
+                let sphere_material: Materials;
+                if choose_mat < 0.8 {
+                    // Diffuse
+                    let albedo = Color3::random() * Color3::random();
+                    sphere_material = Materials::DifuseLamb(MatLambertian::new(albedo));
+                    world.add(Hittables::Sphere(Sphere::new(0.2, center.x, center.y, center.z, sphere_material)));
+                } else if choose_mat < 0.95 {
+                    // Metal
+                    let albedo = Color3::random_ran(0.5, 1.0);
+                    let fuzz = MathUtil::rand_ran(0.0, 0.5);
+                    sphere_material = Materials::Metal(MatMetal::new(albedo, fuzz));
+                    world.add(Hittables::Sphere(Sphere::new(0.2, center.x, center.y, center.z, sphere_material)));
+                } else {
+                    // Glass
+                    sphere_material = Materials::Dielectric(MatDielectric::new(1.5));
+                    world.add(Hittables::Sphere(Sphere::new(0.2, center.x, center.y, center.z, sphere_material)));
+                }
+            }
+        }
+    }
+
+    let material1 = Materials::Dielectric(MatDielectric::new(1.5));
+    world.add(Hittables::Sphere(Sphere::new(1.0, 0.0, 1.0, 0.0, material1)));
+
+    let material2 = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.4, 0.2, 0.1)));
+    world.add(Hittables::Sphere(Sphere::new(1.0, -4.0, 1.0, 0.0, material2)));
+
+    let material3 = Materials::Metal(MatMetal::new(Color3::new(0.7, 0.6, 0.5), 0.0));
+    world.add(Hittables::Sphere(Sphere::new(1.0, 4.0, 1.0, 0.0, material3)));
+
+    let camera = Camera::new(16.0 / 9.0, 1200, 500, 50, 20.0, Point3::new(13.0, 2.0, 3.0), Point3::zero(), Point3::y_u(), 0.6, 10.0);
+
+    let pixels = camera.render_par(&world);
+
+    let image = ImageUtil::get_rgb_image(pixels, camera.im_width(), camera.im_height());
+    let _ = image.save("out-cover.png");
 }
