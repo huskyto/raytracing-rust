@@ -99,7 +99,7 @@ impl MathUtil {
         degrees * PI / 180.0
     }
     pub fn rand() -> f64 {
-        rand::random::<f64>()
+        fastrand::f64()
     }
     pub fn rand_ran(min: f64, max: f64) -> f64 {
         min + (max - min) * MathUtil::rand()
