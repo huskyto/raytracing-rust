@@ -1,4 +1,3 @@
-
 use indicatif::ProgressBar;
 use indicatif::ProgressIterator;
 use rayon::prelude::*;
@@ -34,7 +33,7 @@ pub struct Camera {
 }
 impl Camera {
     // pub fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32, vfov: f64) -> Self {
-    pub fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32,
+    fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32,
                     vfov: f64, lookfrom: Point3, lookat: Point3, vup: Vec3, defocus_angle: f64, focus_dist: f64) -> Self {
         let im_height = u32::max((im_width as f64 / aspect_ratio) as u32, 1);
         // let center = Point3::zero();
@@ -120,6 +119,7 @@ impl Camera {
                 let unit_dir = ray.direction().unit();
                 let a = 0.5 * (unit_dir.y + 1.0);
                 (1.0 - a) * Color3::one() + (a * Color3::new(0.5, 0.7, 1.0))
+                // Color3::one() * 0.1
             },
         }
     }
@@ -213,5 +213,100 @@ impl Camera {
     }
     pub fn im_height(&self) -> u32 {
         self.im_height
+    }
+}
+
+pub struct CameraBuilder {
+    aspect_ratio: f64,
+    im_width: u32,
+    pixel_samples: u32,
+    max_bounces: u32,
+    vfov: f64,
+    lookfrom: Point3,
+    lookat: Point3,
+    vup: Vec3,
+    defocus_angle: f64,
+    focus_dist: f64,
+}
+
+impl CameraBuilder {
+    pub fn new() -> Self {
+        Self {
+            aspect_ratio: 16.0 / 9.0,
+            im_width: 400,
+            pixel_samples: 100,
+            max_bounces: 50,
+            vfov: 90.0,
+            lookfrom: Point3::new(0.0, 0.0, 1.0),
+            lookat: Point3::new(0.0, 0.0, -1.0),
+            vup: Vec3::new(0.0, 1.0, 0.0),
+            defocus_angle: 0.0,
+            focus_dist: 1.0,
+        }
+    }
+
+    pub fn aspect_ratio(mut self, aspect_ratio: f64) -> Self {
+        self.aspect_ratio = aspect_ratio;
+        self
+    }
+
+    pub fn image_width(mut self, im_width: u32) -> Self {
+        self.im_width = im_width;
+        self
+    }
+
+    pub fn samples_per_pixel(mut self, pixel_samples: u32) -> Self {
+        self.pixel_samples = pixel_samples;
+        self
+    }
+
+    pub fn max_bounces(mut self, max_bounces: u32) -> Self {
+        self.max_bounces = max_bounces;
+        self
+    }
+
+    pub fn vertical_fov(mut self, vfov: f64) -> Self {
+        self.vfov = vfov;
+        self
+    }
+
+    pub fn look_from(mut self, lookfrom: Point3) -> Self {
+        self.lookfrom = lookfrom;
+        self
+    }
+
+    pub fn look_at(mut self, lookat: Point3) -> Self {
+        self.lookat = lookat;
+        self
+    }
+
+    pub fn vector_up(mut self, vup: Vec3) -> Self {
+        self.vup = vup;
+        self
+    }
+
+    pub fn defocus_angle(mut self, defocus_angle: f64) -> Self {
+        self.defocus_angle = defocus_angle;
+        self
+    }
+
+    pub fn focus_dist(mut self, focus_dist: f64) -> Self {
+        self.focus_dist = focus_dist;
+        self
+    }
+
+    pub fn build(self) -> Camera {
+        Camera::new(
+            self.aspect_ratio,
+            self.im_width,
+            self.pixel_samples,
+            self.max_bounces,
+            self.vfov,
+            self.lookfrom,
+            self.lookat,
+            self.vup,
+            self.defocus_angle,
+            self.focus_dist,
+        )
     }
 }

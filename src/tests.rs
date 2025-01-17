@@ -203,7 +203,7 @@ mod math_util_tests {
 
 #[cfg(test)]
 mod camera_tests {
-    use crate::camera::Camera;
+    use crate::camera::{Camera, CameraBuilder};
     use crate::datatypes::{Color3, Point3, Ray, Vec3};
     use crate::materials::{MatLambertian, Materials};
     use crate::shapes::{HittableList, Hittables, Sphere};
@@ -212,12 +212,10 @@ mod camera_tests {
     fn test_camera_ray_color_empty_world() {
         let aspect_ratio = 16.0 / 9.0;
         let im_width = 400;
-        let camera = Camera::new(aspect_ratio, im_width, 1, 10,
-                    50.0, 
-                    Point3::new(-2.0, 2.0, 1.0),
-                    Point3::new(0.0, 0.0, -1.0),
-                    Vec3::new(0.0, 1.0, 0.0),
-                    10.0, 3.4);
+        let camera = CameraBuilder::new()
+                .aspect_ratio(aspect_ratio)
+                .image_width(im_width)
+                .build();
         let ray = Ray::new(Point3::zero(), Vec3::new(0.0, 0.0, -1.0));
         let world = HittableList::new();
         let color = camera.ray_color(&ray, 10, &world);
@@ -228,12 +226,10 @@ mod camera_tests {
     fn test_camera_ray_color_with_sphere() {
         let aspect_ratio = 16.0 / 9.0;
         let im_width = 400;
-        let camera = Camera::new(aspect_ratio, im_width, 100, 10,
-                    50.0, 
-                    Point3::new(0.0, 0.0, 1.0),
-                    Point3::new(0.0, 0.0, -1.0),
-                    Vec3::new(0.0, 1.0, 0.0),
-                    0.0, 2.0);
+        let camera = CameraBuilder::new()
+                .aspect_ratio(aspect_ratio)
+                .image_width(im_width)
+                .build();
         let ray = Ray::new(Point3::zero(), Vec3::new(0.0, 0.0, -1.0));
         let mut world = HittableList::new();
         world.add(Hittables::Sphere(Sphere::new(0.5, 0.0, 0.0, -1.0, Materials::DifuseLamb(MatLambertian::GRAY))));

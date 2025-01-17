@@ -1,4 +1,3 @@
-
 pub mod datatypes;
 mod utils;
 mod tests;
@@ -8,6 +7,7 @@ mod materials;
 
 use std::time::Instant;
 
+use camera::CameraBuilder;
 use datatypes::Color3;
 use datatypes::Point3;
 use datatypes::Vec3;
@@ -29,7 +29,7 @@ fn main() {
     dev_scene();
     return;
     let aspect_ratio = 16.0 / 9.0;
-    let im_width: u32 = 800;
+    let im_width: u32 = 400;
 
     let start = Instant::now();
 
@@ -61,7 +61,27 @@ fn main() {
     world.add(Hittables::Sphere(Sphere::new(0.4, -1.0, 0.0, -1.0, mat_bubble)));
     world.add(Hittables::Sphere(Sphere::new(0.5,  1.0, 0.0, -1.0, mat_right)));
 
-    let camera = Camera::new(aspect_ratio, im_width, 100, 50);
+    // let r = f64::cos(std::f64::consts::PI / 4.0);
+    // let mat_left = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.0, 0.0, 1.0)));
+    // let mat_right = Materials::DifuseLamb(MatLambertian::new(Color3::new(1.0, 0.0, 0.0)));
+
+    // world.add(Hittables::Sphere(Sphere::new(r, -r, 0.0, -1.0, mat_left)));
+    // world.add(Hittables::Sphere(Sphere::new(r,  r, 0.0, -1.0, mat_right)));
+
+
+    let camera = CameraBuilder::new()
+        .aspect_ratio(aspect_ratio)
+        .image_width(im_width)
+        .samples_per_pixel(1000)
+        .max_bounces(50)
+        .vertical_fov(90.0)
+        .look_from(Point3::zero())
+        .look_at(-&Point3::z_u())
+        .vector_up(Vec3::y_u())
+        .defocus_angle(2.0)
+        .focus_dist(1.0)
+        .build();
+
     let pixels = camera.render_par(&world);
     // let pixels = camera.render(&world);
 
@@ -114,7 +134,18 @@ fn make_cover() {
     let material3 = Materials::Metal(MatMetal::new(Color3::new(0.7, 0.6, 0.5), 0.0));
     world.add(Hittables::Sphere(Sphere::new(1.0, 4.0, 1.0, 0.0, material3)));
 
-    let camera = Camera::new(16.0 / 9.0, 1200, 500, 50, 20.0, Point3::new(13.0, 2.0, 3.0), Point3::zero(), Point3::y_u(), 0.6, 10.0);
+    let camera = CameraBuilder::new()
+        .aspect_ratio(16.0 / 9.0)
+        .image_width(1200)
+        .samples_per_pixel(500)
+        .max_bounces(50)
+        .vertical_fov(20.0)
+        .look_from(Point3::new(13.0, 2.0, 3.0))
+        .look_at(Point3::zero())
+        .vector_up(Point3::y_u())
+        .defocus_angle(0.6)
+        .focus_dist(10.0)
+        .build();
 
     let pixels = camera.render_par(&world);
 
@@ -135,7 +166,7 @@ fn dev_scene() {
     let mat_left = MaterialFactory::make_dielectric(1.5);
     let mat_bubble = MaterialFactory::make_dielectric(1.0 / 1.5);
     let mat_right = MaterialFactory::make_metal(Color3::new(0.8, 0.8, 0.8), 0.1);
-    let mat_front = MaterialFactory::make_emitter(Color3::one(), 20.0);
+    let mat_light = MaterialFactory::make_emitter(Color3::one(), 20.0);
 
     for _ in 0..10 {
         let color = Color3::random();
@@ -153,16 +184,21 @@ fn dev_scene() {
     world.add(ShapeFactory::make_sphere(0.5, -1.0, 0.0, -1.0, mat_left));
     world.add(ShapeFactory::make_sphere(0.4, -1.0, 0.0, -1.0, mat_bubble));
     world.add(ShapeFactory::make_sphere(0.5, 1.0, 0.0, -1.0, mat_right));
-    world.add(ShapeFactory::make_sphere(0.25, -0.25, 1.0, -0.5, mat_front));
+    // world.add(ShapeFactory::make_sphere(0.25, -0.25, 1.0, -0.5, mat_light));
 
-    let camera = Camera::new(aspect_ratio, im_width, 10000, 50,
-            90.0, Point3::zero(), -&Point3::z_u(), Vec3::y_u(),
-            // 50.0,
-            // Point3::new(-2.0, 2.0, 1.0),
-            // Point3::new(0.0, 0.0, -1.0),
-            // Vec3::new(0.0, 1.0, 0.0),
-            // 2.0, 3.4);
-            2.0, 1.0);
+    let camera = CameraBuilder::new()
+        .aspect_ratio(aspect_ratio)
+        .image_width(im_width)
+        .samples_per_pixel(100)
+        .max_bounces(50)
+        .vertical_fov(90.0)
+        .look_from(Point3::zero())
+        .look_at(-&Point3::z_u())
+        .vector_up(Vec3::y_u())
+        .defocus_angle(2.0)
+        .focus_dist(1.0)
+        .build();
+
     let pixels = camera.render_par(&world);
 
     let elapsed = start.elapsed();
