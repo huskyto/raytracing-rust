@@ -21,7 +21,7 @@ use utils::ImageUtil;
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
-    let im_width: u32 = 400;
+    let im_width: u32 = 800;
 
     let start = Instant::now();
 
@@ -29,8 +29,8 @@ fn main() {
 
     let mat_ground = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.8, 0.8, 0.0)));
     let mat_center = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.1, 0.2, 0.5)));
-    let mat_left = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.8, 0.8)));
-    let mat_right = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.6, 0.2)));
+    let mat_left = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.8, 0.8), 0.0));
+    let mat_right = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.6, 0.2), 0.15));
 
     for _ in 0..10 {
         let color = Color3::random();

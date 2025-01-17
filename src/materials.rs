@@ -41,17 +41,25 @@ impl Material for MatLambertian {
 
 #[derive(Clone)]
 pub struct MatMetal {
-    pub albedo: Color3
+    pub albedo: Color3,
+    pub fuzz: f64
 }
 impl MatMetal {
-    pub fn new(albedo: Color3) -> Self {
-        MatMetal { albedo }
+    pub fn new(albedo: Color3, _fuzz: f64) -> Self {
+        let fuzz = if _fuzz < 1.0 { _fuzz } else { 1.0 };
+        MatMetal { albedo, fuzz }
     }
 }
 impl Material for MatMetal {
     fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)> {
-        let reflected = ray.direction().reflect(&hit_rec.normal);
+        let mut reflected = ray.direction().reflect(&hit_rec.normal);
+        reflected = reflected.unit() + (self.fuzz * Vec3::random_unit());
         let sc_ray = Ray::new(hit_rec.p.clone(), reflected);
-        Some((self.albedo.clone(), sc_ray))
+        if sc_ray.direction().dot(&hit_rec.normal) < 0.0 {
+            None
+        }
+        else {
+            Some((self.albedo.clone(), sc_ray))
+        }
     }
 }
