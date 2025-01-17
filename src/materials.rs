@@ -11,7 +11,8 @@ use crate::utils::MathUtil;
 pub enum Materials {
     DifuseLamb(MatLambertian),
     Metal(MatMetal),
-    Dielectric(MatDielectric)
+    Dielectric(MatDielectric),
+    Emitter(MatEmitter)
 }
 
 
@@ -26,11 +27,14 @@ impl MaterialFactory {
     pub fn make_dielectric(ir: f64) -> Materials {
         Materials::Dielectric(MatDielectric::new(ir))
     }
+    pub fn make_emitter(color: Color3, intensity: f64) -> Materials {
+        Materials::Emitter(MatEmitter::new(color, intensity))
+    }
 }
 
 
 pub trait Material {
-    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)>;
+    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Option<Ray>)>;
 }
 
 #[derive(Clone)]
@@ -44,13 +48,13 @@ impl MatLambertian {
     pub const GRAY: MatLambertian = MatLambertian { albedo: Color3 { x: 0.5, y: 0.5, z: 0.5 } };
 }
 impl Material for MatLambertian {
-    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)> {
+    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Option<Ray>)> {
         let mut sc_direction = &hit_rec.normal + &Vec3::random_unit();
         if sc_direction.is_near_zero() {
             sc_direction = hit_rec.normal.clone();
         }
         let sc_ray = Ray::new(hit_rec.p.clone(), sc_direction);
-        Some((self.albedo.clone(), sc_ray))
+        Some((self.albedo.clone(), Some(sc_ray)))
     }
 }
 
@@ -67,7 +71,7 @@ impl MatMetal {
     }
 }
 impl Material for MatMetal {
-    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)> {
+    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Option<Ray>)> {
         let mut reflected = ray.direction().reflect(&hit_rec.normal);
         reflected = reflected.unit() + (self.fuzz * Vec3::random_unit());
         let sc_ray = Ray::new(hit_rec.p.clone(), reflected);
@@ -75,7 +79,7 @@ impl Material for MatMetal {
             None
         }
         else {
-            Some((self.albedo.clone(), sc_ray))
+            Some((self.albedo.clone(), Some(sc_ray)))
         }
     }
 }
@@ -96,7 +100,7 @@ impl MatDielectric {
     }
 }
 impl Material for MatDielectric {
-    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)> {
+    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Option<Ray>)> {
         let attenuation = Color3::one();
         let ri = if hit_rec.is_front_face { 1.0 / self.ir } else { self.ir };
         let unit_dir = ray.direction().unit();
@@ -114,6 +118,24 @@ impl Material for MatDielectric {
         };
 
         let sc_ray = Ray::new( hit_rec.p.clone(), direction);
-        Some((attenuation, sc_ray))
+        Some((attenuation, Some(sc_ray)))
+    }
+}
+
+
+#[derive(Clone)]
+pub struct MatEmitter {
+    pub color: Color3,
+    pub intensity: f64
+}
+impl MatEmitter {
+    pub fn new(color: Color3, intensity: f64) -> Self {
+        MatEmitter { color, intensity }
+    }
+}
+impl Material for MatEmitter {
+    fn scatter(&self, _ray: &Ray, _hit_rec: &HitRecord) -> Option<(Color3, Option<Ray>)> {
+        let attenuation = &self.color * self.intensity;
+        Some((attenuation, None))
     }
 }

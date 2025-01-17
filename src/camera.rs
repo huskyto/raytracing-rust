@@ -107,7 +107,10 @@ impl Camera {
             Some(hr) => {
                 match MatUtil::scatter(&hr.material, ray, &hr) {
                     Some((att, sc_ray)) => {
-                        att * self.ray_color(&sc_ray, bounces - 1, world)
+                        match sc_ray {
+                            Some(ray) => att * self.ray_color(&ray, bounces - 1, world),
+                            None => att,
+                        }
                     },
                     None => Color3::zero(),
                 }

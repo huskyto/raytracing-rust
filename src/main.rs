@@ -13,8 +13,10 @@ use datatypes::Point3;
 use datatypes::Vec3;
 use materials::MatDielectric;
 use materials::MatMetal;
+use materials::MaterialFactory;
 use materials::Materials;
 use materials::MatLambertian;
+use shapes::ShapeFactory;
 use shapes::Sphere;
 use shapes::Hittables;
 use shapes::HittableList;
@@ -132,7 +134,8 @@ fn dev_scene() {
     let mat_center = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.1, 0.2, 0.5)));
     let mat_left = Materials::Dielectric(MatDielectric::new(1.5));
     let mat_bubble = Materials::Dielectric(MatDielectric::new(1.0 / 1.5));
-    let mat_right = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.8, 0.8), 0.4));
+    let mat_right = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.8, 0.8), 0.1));
+    let mat_front = MaterialFactory::make_emitter(Color3::one(), 20.0);
 
     for _ in 0..10 {
         let color = Color3::random();
@@ -150,9 +153,10 @@ fn dev_scene() {
     world.add(Hittables::Sphere(Sphere::new(0.5, -1.0, 0.0, -1.0, mat_left)));
     world.add(Hittables::Sphere(Sphere::new(0.4, -1.0, 0.0, -1.0, mat_bubble)));
     world.add(Hittables::Sphere(Sphere::new(0.5,  1.0, 0.0, -1.0, mat_right)));
+    world.add(ShapeFactory::make_sphere(0.25, -0.25, 1.0, -0.5, mat_front));
 
 
-    let camera = Camera::new(aspect_ratio, im_width, 1000, 50,
+    let camera = Camera::new(aspect_ratio, im_width, 10000, 50,
             90.0, Point3::zero(), -&Point3::z_u(), Vec3::y_u(),
             // 50.0,
             // Point3::new(-2.0, 2.0, 1.0),

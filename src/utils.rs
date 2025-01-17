@@ -84,11 +84,12 @@ impl HitUtil {
 
 pub struct MatUtil;
 impl MatUtil {
-    pub fn scatter(material: &Materials, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)> {
+    pub fn scatter(material: &Materials, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Option<Ray>)> {
         match material {
             Materials::DifuseLamb(mat) => mat.scatter(ray, hit_rec),
             Materials::Metal(mat) => mat.scatter(ray, hit_rec),
             Materials::Dielectric(mat) => mat.scatter(ray, hit_rec),
+            Materials::Emitter(mat) => mat.scatter(ray, hit_rec),
         }
     }
 }
