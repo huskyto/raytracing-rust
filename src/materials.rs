@@ -80,8 +80,20 @@ impl Material for MatDielectric {
         let attenuation = Color3::one();
         let ri = if hit_rec.is_front_face { 1.0 / self.ir } else { self.ir };
         let unit_dir = ray.direction().unit();
-        let refracted = unit_dir.refract(&hit_rec.normal, ri);
-        let sc_ray = Ray::new( hit_rec.p.clone(), refracted);
+
+        let cos_theta = f64::min(1.0, hit_rec.normal.dot(&-&unit_dir));
+        let sin_theta = f64::sqrt(1.0 - cos_theta * cos_theta);
+
+        let cannot_refract = ri * sin_theta > 1.0;
+
+        let direction = if cannot_refract {
+            unit_dir.reflect(&hit_rec.normal)
+        }
+        else {
+            unit_dir.refract(&hit_rec.normal, ri)
+        };
+
+        let sc_ray = Ray::new( hit_rec.p.clone(), direction);
         Some((attenuation, sc_ray))
     }
 }

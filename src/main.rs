@@ -31,7 +31,7 @@ fn main() {
     let mat_ground = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.8, 0.8, 0.0)));
     let mat_center = Materials::DifuseLamb(MatLambertian::new(Color3::new(0.1, 0.2, 0.5)));
     // let mat_left = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.8, 0.8), 0.0));
-    let mat_left = Materials::Dielectric(MatDielectric::new(1.5));
+    let mat_left = Materials::Dielectric(MatDielectric::new(1.0 / 1.33));
     // let mat_right = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.6, 0.2), 0.15));
     let mat_right = Materials::Metal(MatMetal::new(Color3::new(0.8, 0.6, 0.2), 1.0));
 
