@@ -186,7 +186,7 @@ fn dev_scene() {
     world.add(ShapeFactory::make_sphere(0.5, 1.0, 0.0, -1.0, mat_right));
     // world.add(ShapeFactory::make_sphere(0.25, -0.25, 1.0, -0.5, mat_light));
 
-    let camera = CameraBuilder::new()
+    let mut camera = CameraBuilder::new()
         .aspect_ratio(aspect_ratio)
         .image_width(im_width)
         .samples_per_pixel(100)
@@ -198,6 +198,11 @@ fn dev_scene() {
         .defocus_angle(2.0)
         .focus_dist(1.0)
         .build();
+    // camera.set_center(Vec3::y_u());
+    // camera.set_lookfrom(Vec3::y_u());
+    // camera.set_lookat(Point3::x_u());
+    // camera.set_vfov(50.0);
+    camera.update();
 
     let pixels = camera.render_par(&world);
 

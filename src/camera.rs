@@ -24,38 +24,32 @@ pub struct Camera {
     px_delta_u: Vec3,   // Pixel offset to right
     px_delta_v: Vec3,   // Pixel offset down
     vfov: f64,          // Vertical field of view
-    u: Vec3,            // Camera basis vectors
-    v: Vec3,
-    w: Vec3,
     defocus_angle: f64, // Defocus disk angle
     defocus_dsk_u: Vec3,// Defocus disk vectors
     defocus_dsk_v: Vec3,
+
+    lookat: Point3,
+    lookfrom: Point3,
+    focus_dist: f64,
+    vup: Vec3,
 }
 impl Camera {
-    // pub fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32, vfov: f64) -> Self {
     fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32,
                     vfov: f64, lookfrom: Point3, lookat: Point3, vup: Vec3, defocus_angle: f64, focus_dist: f64) -> Self {
         let im_height = u32::max((im_width as f64 / aspect_ratio) as u32, 1);
-        // let center = Point3::zero();
         let center = lookfrom.clone();      // TODO maybe remove assign
 
                 // Viewport Dimensions
-        // let focal_len = 1.0;
-        // let focal_len = (&lookfrom - &lookat).len();
         let theta = MathUtil::degrees_to_radians(vfov);
         let h = f64::tan(theta / 2.0);
-        // let vp_height = 2.0 * h * focal_len;
         let vp_height = 2.0 * h * focus_dist;
-        // let vp_height = 2.0;
         let vp_width = vp_height * (im_width as f64 / im_height as f64);
 
-        let w = (lookfrom - lookat).unit();
+        let w = (&lookfrom - &lookat).unit();
         let u = vup.cross(&w).unit();
         let v = w.cross(&u);
 
                 // Viewport Dimensions
-        // let vp_u = Vec3::new(vp_width, 0.0, 0.0);
-        // let vp_v = Vec3:: new(0.0, -vp_height, 0.0);
         let vp_u = vp_width * &u;
         let vp_v = vp_height * -&v;
 
@@ -64,8 +58,6 @@ impl Camera {
         let px_delta_v = &vp_v / im_height as f64;
 
         
-        // let vp_upper_left = &center - &Vec3::new(0.0, 0.0, focal_len) - &vp_u / 2.0 - &vp_v / 2.0;
-        // let vp_upper_left = &center - &(focal_len * &w) - vp_u / 2.0 - vp_v / 2.0;
         let vp_upper_left = &center - &(focus_dist * &w) - vp_u / 2.0 - vp_v / 2.0;
         let px_00_loc = &vp_upper_left + &(0.5 * (&px_delta_u + &px_delta_v));
 
@@ -88,15 +80,64 @@ impl Camera {
             px_delta_u,
             px_delta_v,
             vfov,
-            u,
-            v,
-            w,
             defocus_angle,
             defocus_dsk_u,
-            defocus_dsk_v
+            defocus_dsk_v,
+
+            lookat,
+            lookfrom,
+            focus_dist,
+            vup,
         }
     }
-    pub fn ray_color(&self, ray: &Ray, bounces: u32, world: &HittableList) -> Color3 {
+    pub fn set_lookat(&mut self, lookat: Point3) {
+        self.lookat = lookat;
+    }
+    pub fn set_lookfrom(&mut self, lookfrom: Point3) {
+        self.lookfrom = lookfrom;
+    }
+    pub fn set_focus_dist(&mut self, focus_dist: f64) {
+        self.focus_dist = focus_dist;
+    }
+    pub fn set_vup(&mut self, vup: Vec3) {
+        self.vup = vup;
+    }
+    pub fn set_vfov(&mut self, vfov: f64) {
+        self.vfov = vfov;
+    }
+    pub fn update(&mut self) {
+        self.im_height = u32::max((self.im_width as f64 / self.aspect_ratio) as u32, 1);
+        self.center = self.lookfrom.clone();
+
+                // Viewport Dimensions
+        let theta = MathUtil::degrees_to_radians(self.vfov);
+        let h = f64::tan(theta / 2.0);
+        let vp_height = 2.0 * h * self.focus_dist;
+        let vp_width = vp_height * (self.im_width as f64 / self.im_height as f64);
+
+        let w = (&self.lookfrom - &self.lookat).unit();
+        let u = self.vup.cross(&w).unit();
+        let v = w.cross(&u);
+
+                // Viewport Dimensions
+        let vp_u = vp_width * &u;
+        let vp_v = vp_height * -&v;
+
+                // Pixel Delta Vectors
+        self.px_delta_u = &vp_u / self.im_width as f64;
+        self.px_delta_v = &vp_v / self.im_height as f64;
+
+        let vp_upper_left = &self.center - &(self.focus_dist * &w) - vp_u / 2.0 - vp_v / 2.0;
+        self.px_00_loc = &vp_upper_left + &(0.5 * (&self.px_delta_u + &self.px_delta_v));
+
+                // Calculate defocus disk vectors
+        let defocus_radius = self.focus_dist * f64::tan(MathUtil::degrees_to_radians(self.defocus_angle / 2.0));
+        self.defocus_dsk_u = defocus_radius * &u;
+        self.defocus_dsk_v = defocus_radius * &v;
+
+        self.pixel_sample_scale = 1.0 / self.pixel_samples as f64;
+    }
+    pub fn ray_color(ray: &Ray, bounces: u32, world: &HittableList) -> Color3 {
         if bounces == 0 {
             return Color3::zero();
         }
@@ -107,7 +148,7 @@ impl Camera {
                 match MatUtil::scatter(&hr.material, ray, &hr) {
                     Some((att, sc_ray)) => {
                         match sc_ray {
-                            Some(ray) => att * self.ray_color(&ray, bounces - 1, world),
+                            Some(ray) => att * Self::ray_color(&ray, bounces - 1, world),
                             None => att,
                         }
                     },
@@ -131,7 +172,7 @@ impl Camera {
                 let mut pixel = Color3::zero();
                 for _sample in 0..self.pixel_samples {
                     let ray = self.get_ray(i, j);
-                    pixel += self.ray_color(&ray, self.max_bounces, world);
+                    pixel += Self::ray_color(&ray, self.max_bounces, world);
                 }
                 pixels.push(pixel * self.pixel_sample_scale);
             }
@@ -156,7 +197,7 @@ impl Camera {
             let mut pixel = Color3::zero();
             for _sample in 0..self.pixel_samples {
                 let ray = self.get_ray(*i, *j);
-                pixel += self.ray_color(&ray, self.max_bounces, world);
+                pixel += Self::ray_color(&ray, self.max_bounces, world);
             }
             progress_bar.inc(1);
             pixel * self.pixel_sample_scale
@@ -178,7 +219,7 @@ impl Camera {
                 let mut pixel = Color3::zero();
                 for _sample in 0..self.pixel_samples {
                     let ray = self.get_ray(i, *j);
-                    pixel += self.ray_color(&ray, self.max_bounces, world);
+                    pixel += Self::ray_color(&ray, self.max_bounces, world);
                 }
                 local_v.push(pixel * self.pixel_sample_scale)
             }
