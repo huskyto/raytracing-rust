@@ -1,5 +1,5 @@
+
 use indicatif::ProgressBar;
-use indicatif::ProgressIterator;
 use rayon::prelude::*;
 
 use crate::datatypes::Ray;
@@ -166,24 +166,6 @@ impl Camera {
     }
     pub fn render(&self, world: &HittableList) -> Vec<Color3> {
         let mut pixels: Vec<Color3> = Vec::new();
-
-        for j in (0..self.im_height).progress() {
-            for i in 0..self.im_width {
-                let mut pixel = Color3::zero();
-                for _sample in 0..self.pixel_samples {
-                    let ray = self.get_ray(i, j);
-                    pixel += Self::ray_color(&ray, self.max_bounces, world);
-                }
-                pixels.push(pixel * self.pixel_sample_scale);
-            }
-            // let ten_millis = time::Duration::from_millis(2);
-            // thread::sleep(ten_millis);
-        }
-
-        pixels
-    }
-    pub fn render_par(&self, world: &HittableList) -> Vec<Color3> {
-        let mut pixels: Vec<Color3> = Vec::new();
         let mut points: Vec<(u32, u32)> = Vec::new();
 
         for j in 0..self.im_height {
@@ -205,30 +187,6 @@ impl Camera {
 
         pixels
     }
-    pub fn render_par_lar(&self, world: &HittableList) -> Vec<Color3> {
-        let mut is: Vec<u32> = Vec::new();
-
-        for j in 0..self.im_height {
-            is.push(j);
-        }
-
-        let progress_bar = ProgressBar::new(is.len() as u64);
-        let pixels = is.par_iter().map(|j| {
-            let mut local_v = Vec::new();
-            for i in 0..self.im_width {
-                let mut pixel = Color3::zero();
-                for _sample in 0..self.pixel_samples {
-                    let ray = self.get_ray(i, *j);
-                    pixel += Self::ray_color(&ray, self.max_bounces, world);
-                }
-                local_v.push(pixel * self.pixel_sample_scale)
-            }
-            progress_bar.inc(1);
-            local_v
-        }).flatten().collect::<Vec<Color3>>();
-
-        pixels
-    }
         // TODO I think there's a better way to do this.
     pub fn get_ray(&self, i: u32, j: u32) -> Ray {
         let offset = Self::sample_square();
@@ -236,9 +194,8 @@ impl Camera {
                     + &((i as f64 + offset.x) * &self.px_delta_u)
                     + (j as f64 + offset.y) * &self.px_delta_v;
 
-        // let ray_origin = &self.center;
         let ray_origin = if self.defocus_angle <= 0.0 { &self.center } else { &self.defocus_disk_sample() };
-        let ray_dir = &pixel_sample - &ray_origin;
+        let ray_dir = &pixel_sample - ray_origin;
 
         Ray::new(ray_origin.clone(), ray_dir)
     }

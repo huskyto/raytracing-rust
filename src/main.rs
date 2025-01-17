@@ -82,7 +82,7 @@ fn main() {
         .focus_dist(1.0)
         .build();
 
-    let pixels = camera.render_par(&world);
+    let pixels = camera.render(&world);
     // let pixels = camera.render(&world);
 
     let elapsed = start.elapsed();
@@ -147,7 +147,7 @@ fn make_cover() {
         .focus_dist(10.0)
         .build();
 
-    let pixels = camera.render_par(&world);
+    let pixels = camera.render(&world);
 
     let image = ImageUtil::get_rgb_image(pixels, camera.im_width(), camera.im_height());
     let _ = image.save("out-cover.png");
@@ -204,7 +204,7 @@ fn dev_scene() {
     // camera.set_vfov(50.0);
     camera.update();
 
-    let pixels = camera.render_par(&world);
+    let pixels = camera.render(&world);
 
     let elapsed = start.elapsed();
     println!("Run time: {}", elapsed.as_millis());

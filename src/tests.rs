@@ -203,37 +203,25 @@ mod math_util_tests {
 
 #[cfg(test)]
 mod camera_tests {
-    use crate::camera::{Camera, CameraBuilder};
+    use crate::camera::Camera;
     use crate::datatypes::{Color3, Point3, Ray, Vec3};
     use crate::materials::{MatLambertian, Materials};
     use crate::shapes::{HittableList, Hittables, Sphere};
 
     #[test]
     fn test_camera_ray_color_empty_world() {
-        let aspect_ratio = 16.0 / 9.0;
-        let im_width = 400;
-        let camera = CameraBuilder::new()
-                .aspect_ratio(aspect_ratio)
-                .image_width(im_width)
-                .build();
         let ray = Ray::new(Point3::zero(), Vec3::new(0.0, 0.0, -1.0));
         let world = HittableList::new();
-        let color = camera.ray_color(&ray, 10, &world);
+        let color = Camera::ray_color(&ray, 10, &world);
         assert_eq!(color, Color3::new(0.75, 0.85, 1.0)); // Background color
     }
 
     #[test]
     fn test_camera_ray_color_with_sphere() {
-        let aspect_ratio = 16.0 / 9.0;
-        let im_width = 400;
-        let camera = CameraBuilder::new()
-                .aspect_ratio(aspect_ratio)
-                .image_width(im_width)
-                .build();
         let ray = Ray::new(Point3::zero(), Vec3::new(0.0, 0.0, -1.0));
         let mut world = HittableList::new();
         world.add(Hittables::Sphere(Sphere::new(0.5, 0.0, 0.0, -1.0, Materials::DifuseLamb(MatLambertian::GRAY))));
-        let color = camera.ray_color(&ray, 10, &world);
+        let color = Camera::ray_color(&ray, 10, &world);
         assert!((color.x - 0.42).abs() < 0.02);
         assert!((color.y - 0.45).abs() < 0.02);
         assert!((color.z - 0.5).abs() < 0.02);
