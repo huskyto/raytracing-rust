@@ -13,6 +13,18 @@ pub enum Hittables {
     HittableList(HittableList)
 }
 
+
+pub struct ShapeFactory;
+impl ShapeFactory {
+    pub fn make_sphere(radius: f64, x: f64, y: f64, z: f64, material: Materials) -> Hittables {
+        Hittables::Sphere(Sphere::new(radius, x, y, z, material))
+    }
+    pub fn make_hittable_list() -> Hittables {
+        Hittables::HittableList(HittableList::new())
+    }
+}
+
+
 #[derive(Clone)]
 pub struct Sphere {
     pub radius: f64,

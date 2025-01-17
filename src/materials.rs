@@ -15,6 +15,20 @@ pub enum Materials {
 }
 
 
+pub struct MaterialFactory;
+impl MaterialFactory {
+    pub fn make_lambertian(albedo: Color3) -> Materials {
+        Materials::DifuseLamb(MatLambertian::new(albedo))
+    }
+    pub fn make_metal(albedo: Color3, fuzz: f64) -> Materials {
+        Materials::Metal(MatMetal::new(albedo, fuzz))
+    }
+    pub fn make_dielectric(ir: f64) -> Materials {
+        Materials::Dielectric(MatDielectric::new(ir))
+    }
+}
+
+
 pub trait Material {
     fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Ray)>;
 }
