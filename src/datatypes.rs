@@ -11,7 +11,6 @@ use std::ops::MulAssign;
 use std::ops::DivAssign;
 use std::fmt::Display;
 
-use crate::utils::MatUtil;
 use crate::utils::MathUtil;
 use crate::materials::Materials;
 
@@ -104,6 +103,11 @@ impl Vec3 {
         let r_out_perp = etai_over_etat * (self + &(cos_theta * n));
         let r_out_parallel = -f64::sqrt(f64::abs(1.0 - r_out_perp.len_sqr())) * n;
         r_out_perp + r_out_parallel
+    }
+    pub fn flip(&mut self) {
+        self.x = -self.x;
+        self.y = -self.y;
+        self.z = -self.z;
     }
 }
 

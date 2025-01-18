@@ -235,7 +235,7 @@ impl CameraBuilder {
             pixel_samples: 100,
             max_bounces: 50,
             vfov: 90.0,
-            lookfrom: Point3::new(0.0, 0.0, 1.0),
+            lookfrom: Point3::zero(),
             lookat: Point3::new(0.0, 0.0, -1.0),
             vup: Vec3::new(0.0, 1.0, 0.0),
             defocus_angle: 0.0,
