@@ -33,6 +33,8 @@ pub struct Camera {
     focus_dist: f64,
     vup: Vec3,
 }
+#[allow(clippy::too_many_arguments)]
+#[allow(unused)]
 impl Camera {
     fn new(aspect_ratio: f64, im_width: u32, pixel_samples: u32, max_bounces: u32,
                     vfov: f64, lookfrom: Point3, lookat: Point3, vup: Vec3, defocus_angle: f64, focus_dist: f64) -> Self {
@@ -142,8 +144,7 @@ impl Camera {
             return Color3::zero();
         }
 
-        let interval = Interval::new(0.001, f64::INFINITY);
-        match world.hit(ray, &interval) {
+        match world.hit(ray, &Interval::HIT_EVAL) {
             Some(hr) => {
                 match MatUtil::scatter(&hr.material, ray, &hr) {
                     Some((att, sc_ray)) => {

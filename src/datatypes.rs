@@ -307,7 +307,8 @@ impl Interval {
         else if x > self.max { self.max }
         else { x }
     }
-    const EMPTY: Interval = Self { min: f64::INFINITY, max: f64::NEG_INFINITY };
-    const UNIVERSE: Interval = Self { min: f64::NEG_INFINITY, max: f64::INFINITY };
+    pub const EMPTY: Interval = Self { min: f64::INFINITY, max: f64::NEG_INFINITY };
+    pub const UNIVERSE: Interval = Self { min: f64::NEG_INFINITY, max: f64::INFINITY };
+    pub const HIT_EVAL: Interval = Self { min: 0.001, max: f64::INFINITY };
 }
 

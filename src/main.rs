@@ -1,3 +1,4 @@
+
 pub mod datatypes;
 mod utils;
 mod tests;
@@ -20,13 +21,14 @@ use shapes::ShapeFactory;
 use shapes::Sphere;
 use shapes::Hittables;
 use shapes::HittableList;
-use camera::Camera;
 use utils::MathUtil;
 use utils::ImageUtil;
 
+#[allow(unreachable_code)]
 fn main() {
     // make_cover();
-    dev_scene();
+    // dev_scene();
+    bench_scene();
     return;
     let aspect_ratio = 16.0 / 9.0;
     let im_width: u32 = 400;
@@ -92,6 +94,7 @@ fn main() {
     let _ = image.save("output.png");
 }
 
+#[allow(dead_code)]
 fn make_cover() {
     let mut world = HittableList::new();
 
@@ -153,6 +156,7 @@ fn make_cover() {
     let _ = image.save("out-cover.png");
 }
 
+#[allow(dead_code)]
 fn dev_scene() {
     let aspect_ratio = 16.0 / 9.0;
     let im_width: u32 = 400;
@@ -166,7 +170,7 @@ fn dev_scene() {
     let mat_left = MaterialFactory::make_dielectric(1.5);
     let mat_bubble = MaterialFactory::make_dielectric(1.0 / 1.5);
     let mat_right = MaterialFactory::make_metal(Color3::new(0.8, 0.8, 0.8), 0.1);
-    let mat_light = MaterialFactory::make_emitter(Color3::one(), 20.0);
+    // let mat_light = MaterialFactory::make_emitter(Color3::one(), 20.0);
 
     for _ in 0..10 {
         let color = Color3::random();
@@ -211,4 +215,51 @@ fn dev_scene() {
 
     let image = ImageUtil::get_rgb_image(pixels, camera.im_width(), camera.im_height());
     let _ = image.save("out-dev.png");
+}
+
+#[allow(dead_code)]
+fn bench_scene() {
+    let start = Instant::now();
+
+    let mut world = HittableList::new();
+
+    let mat_ground = MaterialFactory::make_lambertian(Color3::new(0.7, 0.7, 0.2));
+    let mat_center = MaterialFactory::make_lambertian(Color3::new(0.1, 0.2, 0.5));
+    let mat_left = MaterialFactory::make_dielectric(1.5);
+    let mat_bubble = MaterialFactory::make_dielectric(1.0 / 1.5);
+    let mat_right = MaterialFactory::make_metal(Color3::new(0.8, 0.8, 0.8), 0.1);
+
+    for _ in 0..40 {
+        let color = Color3::random();
+        let material = MaterialFactory::make_lambertian(color);
+        let radius = MathUtil::rand_ran(0.25, 1.5);
+        let x = MathUtil::rand_ran(-20.0, 20.0);
+        let y = MathUtil::rand_ran(5.0, 10.0);
+        let z = MathUtil::rand_ran(20.0, -20.0);
+        let sphere = ShapeFactory::make_sphere(radius, x, y, z, material);
+        world.add(sphere);
+    }
+
+    world.add(ShapeFactory::make_sphere(100.0, 0.0, -100.5, -1.0, mat_ground));
+    world.add(ShapeFactory::make_sphere(0.5, 0.0, 0.0, -1.2, mat_center));
+    world.add(ShapeFactory::make_sphere(0.5, -1.0, 0.0, -1.0, mat_left));
+    world.add(ShapeFactory::make_sphere(0.4, -1.0, 0.0, -1.0, mat_bubble));
+    world.add(ShapeFactory::make_sphere(0.5, 1.0, 0.0, -1.0, mat_right));
+
+    let mut camera = CameraBuilder::new()
+        .image_width(800)
+        .samples_per_pixel(400)
+        .max_bounces(50)
+        .defocus_angle(2.0)
+        .focus_dist(1.0)
+        .build();
+    camera.update();
+
+    let pixels = camera.render(&world);
+
+    let elapsed = start.elapsed();
+    println!("Run time: {}", elapsed.as_millis());
+
+    let image = ImageUtil::get_rgb_image(pixels, camera.im_width(), camera.im_height());
+    let _ = image.save("out-bench.png");
 }

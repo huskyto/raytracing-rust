@@ -7,6 +7,7 @@ use crate::datatypes::HitRecord;
 use crate::materials::Materials;
 use crate::utils::HitUtil;
 
+#[allow(unused)]
 #[derive(Clone)]
 pub enum Hittables {
     Sphere(Sphere),
@@ -15,6 +16,7 @@ pub enum Hittables {
 
 
 pub struct ShapeFactory;
+#[allow(unused)]
 impl ShapeFactory {
     pub fn make_sphere(radius: f64, x: f64, y: f64, z: f64, material: Materials) -> Hittables {
         Hittables::Sphere(Sphere::new(radius, x, y, z, material))
@@ -63,16 +65,10 @@ impl Hittable for Sphere {
         }
 
         let p = ray.at(root);
-        let mut normal = (&p - &self.center) / self.radius;
-        // let outward_normal = (&p - &self.center) / self.radius;
-
-        let is_front_face = ray.direction().dot(&normal) < 0.0;
-        if !is_front_face {
-            normal.flip() 
-        };
-
-        let mut hit_rec = HitRecord::new(p, normal, root, self.material.clone());
-        hit_rec.is_front_face = is_front_face;
+        let mut hit_rec = HitRecord::new(p.clone(), (&p - &self.center) / self.radius, root, self.material.clone());
+        let outward_normal = (&p - &self.center) / self.radius;
+            // TODO: consider doing on init.
+        hit_rec.set_face_normal(ray, &outward_normal);
 
         Some(hit_rec)
     }

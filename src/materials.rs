@@ -17,6 +17,7 @@ pub enum Materials {
 
 
 pub struct MaterialFactory;
+#[allow(unused)]
 impl MaterialFactory {
     pub fn make_lambertian(albedo: Color3) -> Materials {
         Materials::DifuseLamb(MatLambertian::new(albedo))
@@ -48,7 +49,7 @@ impl MatLambertian {
     pub const GRAY: MatLambertian = MatLambertian { albedo: Color3 { x: 0.5, y: 0.5, z: 0.5 } };
 }
 impl Material for MatLambertian {
-    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Option<Ray>)> {
+    fn scatter(&self, _ray: &Ray, hit_rec: &HitRecord) -> Option<(Color3, Option<Ray>)> {
         let mut sc_direction = &hit_rec.normal + &Vec3::random_unit();
         if sc_direction.is_near_zero() {
             sc_direction = hit_rec.normal.clone();
